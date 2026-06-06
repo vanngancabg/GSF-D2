@@ -1,5 +1,5 @@
 
-const SCRIPT_URL = "DAN_LINK_GOOGLE_SCRIPT_VAO_DAY";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzQ-XX0x71RO51Iep7o5E2eTF3zIiOtBIMREI1dW7RDUOrn_NoF7z01fk18cEqHb4fxsw/exec";
 
 const form = document.getElementById("memberForm");
 const tableBody = document.getElementById("memberTableBody");
