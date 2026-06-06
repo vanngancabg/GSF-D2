@@ -50,7 +50,7 @@ const memberData = {
 fullName: document.getElementById("fullName").value,
 birthYear: document.getElementById("birthYear").value,
 accounts: document.getElementById("accounts").value,
-zalo: document.getElementById("zalo").value
+zalo: String(document.getElementById("zalo").value)
 };
 
 try{
