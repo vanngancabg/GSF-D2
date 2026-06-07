@@ -1,4 +1,3 @@
-// ĐỔI LINK NÀY THÀNH LINK WEB APP APPS SCRIPT MỚI CỦA BẠN ĐÃ CẬP NHẬT Ở BƯỚC 1
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3ukMrZ0D17rGEXwxZ3f2jzMq_EEnj6goi_z_VrobigC-J4QZqwxpEL4HNDzSKkzQ/exec";
 
 const form = document.getElementById('memberForm');
@@ -7,199 +6,164 @@ const accountContainer = document.getElementById('accountInputContainer');
 const addAccountBtn = document.getElementById('addAccountBtn');
 const searchInput = document.getElementById('searchAccount');
 
-let allMembersData = []; // Nơi lưu trữ tạm thời danh sách tải về phục vụ việc tìm kiếm lọc
+let allMembersData = []; 
 
 // ==========================================
-// 1. CÁC QUY TẮC ÉP KIỂU KHI GÕ (YÊU CẦU 2)
+// ÉP KIỂU NHẬP LIỆU NGAY KHI GÕ
 // ==========================================
-
-// [Họ và tên]: Chỉ cho phép nhập ký tự chữ (bao gồm cả Tiếng Việt có dấu) và khoảng trắng
-document.getElementById('fullName').addEventListener('input', function(e) {
+document.getElementById('fullName').addEventListener('input', function() {
     this.value = this.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '');
 });
 
-// [Năm sinh]: Chỉ được gõ số, tối đa đúng 4 ký tự
-document.getElementById('birthYear').addEventListener('input', function(e) {
-    this.value = this.value.replace(/[^0-9]/g, ''); // Xóa toàn bộ ký tự không phải số
-    if (this.value.length > 4) {
-        this.value = this.value.slice(0, 4); // Chặn không cho vượt quá 4 số
-    }
+document.getElementById('birthYear').addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9]/g, '');
+    if (this.value.length > 4) this.value = this.value.slice(0, 4);
 });
 
-// [Số điện thoại Zalo]: Chỉ được gõ số, tối đa 10 số, BẮT BUỘC ký tự đầu tiên phải là số 0
-document.getElementById('zalo').addEventListener('input', function(e) {
-    let val = this.value.replace(/[^0-9]/g, ''); // Xóa toàn bộ ký tự không phải số
-    
-    // Nếu có ký tự đầu tiên mà ký tự đó khác '0' -> Xóa luôn, buộc phải gõ số 0 đầu tiên
-    if (val.length > 0 && val[0] !== '0') {
-        val = '';
-    }
-    
-    if (val.length > 10) {
-        val = val.slice(0, 10); // Chặn không cho vượt quá 10 số
-    }
+document.getElementById('zalo').addEventListener('input', function() {
+    let val = this.value.replace(/[^0-9]/g, '');
+    if (val.length > 0 && val[0] !== '0') val = '';
+    if (val.length > 10) val = val.slice(0, 10);
     this.value = val;
 });
 
-
 // ==========================================
-// 2. XỬ LÝ NÚT CỘNG THÊM Ô NHẬP ACC GAME (YÊU CẦU 1)
+// THÊM/XÓA Ô NHẬP ACC GAME
 // ==========================================
 addAccountBtn.addEventListener('click', function() {
     const wrapper = document.createElement('div');
-    wrapper.className = 'account-input-wrapper';
-    wrapper.style.marginTop = '8px';
-    
+    wrapper.className = 'account-input-wrapper animated fadeIn';
+    wrapper.style.marginTop = '10px';
     wrapper.innerHTML = `
-        <input type="text" class="account-field" placeholder="Nhập tên Acc game khác" required>
+        <input type="text" class="account-field" placeholder="Nhập tên tài khoản game khác" required autocomplete="off">
         <button type="button" class="remove-acc-btn">-</button>
     `;
-    
     accountContainer.appendChild(wrapper);
-    
-    // Xử lý sự kiện xóa ô nhập này nếu bấm nút trừ "-"
-    wrapper.querySelector('.remove-acc-btn').addEventListener('click', function() {
-        wrapper.remove();
-    });
+    wrapper.querySelector('.remove-acc-btn').addEventListener('click', () => wrapper.remove());
 });
 
-
 // ==========================================
-// 3. TẢI VÀ HIỂN THỊ DANH SÁCH + TÌM KIẾM (YÊU CẦU 3)
+// TẢI DỮ LIỆU & TÍNH TOÁN THỐNG KÊ
 // ==========================================
 function loadMembers() {
-    tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Đang tải danh sách ...</td></tr>';
-    
     fetch(SCRIPT_URL)
         .then(response => response.json())
         .then(data => {
-            allMembersData = data; // Lưu trữ dữ liệu gốc phục vụ việc tìm kiếm
-            renderTable(allMembersData);
+            allMembersData = data;
+            updateDashboardCounters(data);
+            renderTable(data);
         })
         .catch(error => {
             console.error('Lỗi:', error);
-            tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Không thể tải dữ liệu!</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#ef4444;">Lỗi tải dữ liệu danh sách!</td></tr>';
         });
 }
 
-// Hàm render dữ liệu ra bảng giao diện hiển thị
+function updateDashboardCounters(data) {
+    let total = data.length;
+    let approved = 0;
+    
+    data.forEach(m => {
+        if (m.status === true || m.status === "TRUE" || m.status === "Rồi") approved++;
+    });
+    
+    document.getElementById('totalAccs').innerText = total;
+    document.getElementById('approvedAccs').innerText = approved;
+    document.getElementById('pendingAccs').innerText = (total - approved);
+}
+
 function renderTable(dataList) {
     tableBody.innerHTML = '';
     if(dataList.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Không tìm thấy kết quả hoặc danh sách trống.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: #64748b;">Không tìm thấy tài khoản nào phù hợp.</td></tr>';
         return;
     }
     
-    dataList.forEach(member => {
+    dataList.forEach((member, index) => {
         const row = document.createElement('tr');
         
-        let statusHtml = '';
-        if (member.status === true || member.status === "TRUE" || member.status === "Rồi") {
-            statusHtml = '<span style="color: #10b981; font-weight: bold;">✔ Đã duyệt</span>';
-        } else {
-            statusHtml = '<span style="color: #ef4444;">❌ Chưa</span>';
-        }
+        let isApproved = (member.status === true || member.status === "TRUE" || member.status === "Rồi");
+        let statusHtml = isApproved 
+            ? '<span class="status-badge approved">✔ Đã duyệt</span>' 
+            : '<span class="status-badge pending">⏳ Chờ duyệt</span>';
+
+        if (!isApproved) row.className = 'row-pending';
 
         let zaloStr = String(member.zalo || '').trim();
-        if (zaloStr.length === 9 && /^[35789]/.test(zaloStr)) {
-            zaloStr = '0' + zaloStr;
-        }
+        if (zaloStr.length === 9 && /^[35789].test(zaloStr)) zaloStr = '0' + zaloStr;
 
         row.innerHTML = `
-            <td>${member.fullName || ''}</td>
+            <td style="color: #64748b; font-weight: 500;">${index + 1}</td>
+            <td style="font-weight: 500;">${member.fullName || ''}</td>
             <td>${member.birthYear || ''}</td>
-            <td class="acc-column-highlight">${member.accounts || ''}</td>
-            <td><a class='zalo-link' href='https://zalo.me/${zaloStr}' target='_blank'>${zaloStr}</a></td>
-            <td style="text-align:center;">${statusHtml}</td>
+            <td>
+                <div class="acc-cell">
+                    <span class="acc-name">${member.accounts || ''}</span>
+                    <button class="btn-copy-mini" onclick="copyToClipboard('${member.accounts}')" title="Copy tên Acc">📋</button>
+                </div>
+            </td>
+            <td><a class='zalo-link-row' href='https://zalo.me/${zaloStr}' target='_blank'>💬 ${zaloStr}</a></td>
+            <td>${statusHtml}</td>
         `;
         tableBody.appendChild(row);
     });
 }
 
-// Bắt sự kiện gõ vào thanh tìm kiếm lọc theo cột "Tên Acc" (Yêu cầu số 3)
+// Hàm hỗ trợ copy nhanh tên tài khoản
+window.copyToClipboard = function(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        alert(`Đã copy tài khoản: ${text}`);
+    }).catch(err => console.error('Không thể copy', err));
+}
+
+// BỘ LỌC TÌM KIẾM
 searchInput.addEventListener('input', function() {
-    const filterValue = this.value.toLowerCase().trim();
-    
-    // Lọc mảng dữ liệu gốc, chỉ lấy các hàng có chứa chuỗi tìm kiếm trong cột accounts
-    const filteredData = allMembersData.filter(member => {
-        const accName = String(member.accounts || '').toLowerCase();
-        return accName.includes(filterValue);
-    });
-    
-    renderTable(filteredData); // Hiển thị mảng đã lọc
+    const query = this.value.toLowerCase().trim();
+    const filtered = allMembersData.filter(m => String(m.accounts || '').toLowerCase().includes(query));
+    renderTable(filtered);
 });
 
-
-// ==========================================
-// 4. GỬI DỮ LIỆU ĐĂNG KÝ LÊN GOOGLE SHEETS
-// ==========================================
+// GỬI DATA FORM ĐĂNG KÝ
 form.addEventListener('submit', function(event) {
     event.preventDefault();
+    const birth = document.getElementById('birthYear').value;
+    const zaloVal = document.getElementById('zalo').value;
     
-    // Kiểm tra nhanh điều kiện năm sinh và sđt trước khi gửi
-    const birthYearInput = document.getElementById('birthYear').value;
-    const zaloInput = document.getElementById('zalo').value;
-    
-    if(birthYearInput.length !== 4) {
-        alert("Năm sinh bắt buộc phải nhập đủ 4 chữ số!");
-        return;
-    }
-    if(zaloInput.length !== 10) {
-        alert("Số điện thoại Zalo bắt buộc phải nhập đủ 10 chữ số!");
+    if(birth.length !== 4 || zaloVal.length !== 10) {
+        alert("Vui lòng kiểm tra lại độ dài Năm sinh (4 số) hoặc Số Zalo (10 số)!");
         return;
     }
 
     const submitBtn = form.querySelector('.submit-main-btn');
-    submitBtn.innerText = 'Đang gửi...';
+    submitBtn.innerText = 'Đang gửi thông tin đăng ký...';
     submitBtn.disabled = true;
 
-    // Thu thập tất cả các giá trị từ các ô nhập Acc game đang hiển thị
     const accountFields = document.querySelectorAll('.account-field');
     const accountsList = [];
-    accountFields.forEach(field => {
-        if(field.value.trim() !== "") {
-            accountsList.push(field.value.trim());
-        }
-    });
+    accountFields.forEach(f => { if(f.value.trim() !== "") accountsList.push(f.value.trim()); });
 
     const newMember = {
         fullName: document.getElementById('fullName').value.trim(),
-        birthYear: birthYearInput,
-        accounts: accountsList, // Truyền một mảng các Acc game
-        zalo: zaloInput
+        birthYear: birth,
+        accounts: accountsList,
+        zalo: zaloVal
     };
 
-    fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors', 
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(newMember)
-    })
+    fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newMember) })
     .then(() => {
-        alert('Đăng ký thành công! Đã tự động phân tách mỗi Acc thành một hàng riêng biệt.');
-        
-        // Reset form và dọn dẹp các ô nhập Acc game cộng thêm (chỉ giữ lại ô đầu)
+        alert('Đăng ký thành công! Đang đồng bộ hóa dữ liệu hệ thống.');
         form.reset();
-        const wrappers = document.querySelectorAll('.account-input-wrapper');
-        for(let i = 1; i < wrappers.length; i++) {
-            wrappers[i].remove();
-        }
-        
-        submitBtn.innerText = 'Đăng ký';
+        document.querySelectorAll('.account-input-wrapper').forEach((w, idx) => { if(idx > 0) w.remove(); });
+        submitBtn.innerText = 'Gửi Đăng Ký Tham Gia';
         submitBtn.disabled = false;
-        
-        // Đợi 2.5 giây rồi tải lại danh sách cập nhật mới nhất
-        setTimeout(loadMembers, 2500);
+        setTimeout(loadMembers, 2000);
     })
     .catch(error => {
-        console.error('Lỗi gửi dữ liệu:', error);
-        alert('Có lỗi xảy ra khi gửi đăng ký!');
-        submitBtn.innerText = 'Đăng ký';
+        console.error(error);
+        alert('Có lỗi hệ thống xảy ra!');
+        submitBtn.innerText = 'Gửi Đăng Ký Tham Gia';
         submitBtn.disabled = false;
     });
 });
 
-// Kích hoạt chạy hàm tải danh sách ngay khi vừa mở trang web lên
 loadMembers();
