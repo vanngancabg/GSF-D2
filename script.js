@@ -13,9 +13,8 @@ let allMembersData = [];
 // 1. ÉP KIỂU VÀ CHUẨN HÓA DỮ LIỆU NHẬP LIỆU
 // ==========================================
 
+// [Họ và Tên]: KHÔNG lọc khi đang gõ để tránh lỗi Unikey. Chỉ lọc sạch ký tự lạ khi người dùng rời ô nhập.
 const fullNameInput = document.getElementById('fullName');
-
-// Đối với Họ Tên: KHÔNG lọc khi đang gõ (để không lỗi Unikey). Chỉ tự động lọc sạch khi người dùng nhấn chuột ra ngoài ô nhập.
 fullNameInput.addEventListener('blur', function() {
     this.value = this.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '').trim();
 });
@@ -26,13 +25,34 @@ document.getElementById('birthYear').addEventListener('input', function() {
     if (this.value.length > 4) this.value = this.value.slice(0, 4);
 });
 
-// [Số điện thoại Zalo]: Chỉ số, tối đa 10 ký tự, bắt đầu bằng số 0
+// [Số điện thoại Zalo]: Chỉ gõ số, tối đa 10 ký tự, bắt đầu bằng số 0
 document.getElementById('zalo').addEventListener('input', function() {
     let val = this.value.replace(/[^0-9]/g, '');
     if (val.length > 0 && val[0] !== '0') val = '';
     if (val.length > 10) val = val.slice(0, 10);
     this.value = val;
 });
+
+// [HÀM TIỆN ÍCH]: Ép quy tắc cho ô nhập Acc game (Chỉ chữ không dấu, số, tối đa 15 ký tự)
+function applyAccountFieldRestriction(inputField) {
+    inputField.addEventListener('input', function() {
+        // Chỉ giữ lại ký tự chữ thường (a-z), chữ hoa (A-Z) và số (0-9)
+        let val = this.value.replace(/[^a-zA-Z0-9]/g, '');
+        
+        // Giới hạn độ dài tối đa là 15 ký tự
+        if (val.length > 15) {
+            val = val.slice(0, 15);
+        }
+        this.value = val;
+    });
+}
+
+// Áp dụng quy tắc ngay lập tức cho ô nhập Acc game đầu tiên có sẵn trên giao diện
+const firstAccountField = document.querySelector('.account-field');
+if (firstAccountField) {
+    applyAccountFieldRestriction(firstAccountField);
+}
+
 
 // ==========================================
 // 2. THÊM / XÓA Ô NHẬP LIỆU ACC GAME
@@ -46,6 +66,13 @@ addAccountBtn.addEventListener('click', function() {
         <button type="button" class="remove-acc-btn">-</button>
     `;
     accountContainer.appendChild(wrapper);
+    
+    // Tìm ô nhập Acc game mới vừa được tạo ra
+    const newAccountField = wrapper.querySelector('.account-field');
+    // Áp dụng quy tắc chặn chữ có dấu và giới hạn 15 ký tự cho ô mới này
+    applyAccountFieldRestriction(newAccountField);
+
+    // Xử lý nút xóa ô nhập
     wrapper.querySelector('.remove-acc-btn').addEventListener('click', function() {
         wrapper.remove();
     });
@@ -135,7 +162,7 @@ searchInput.addEventListener('input', function() {
 form.addEventListener('submit', function(event) {
     event.preventDefault();
     
-    // Trước khi gửi, tiến hành quét sạch ký tự lạ ở ô Họ Tên một lần nữa để bảo đảm dữ liệu gửi lên Sheets luôn chuẩn
+    // Quét dọn lần cuối ô Họ Tên để bảo đảm dữ liệu sạch trước khi đẩy lên Google Sheets
     let finalCleanName = fullNameInput.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '').trim();
     fullNameInput.value = finalCleanName;
 
