@@ -318,7 +318,7 @@ form.addEventListener('submit', function(event) {
         body: JSON.stringify(newMember) 
     })
     .then(() => {
-        alert('Đăng ký thành công! Hệ thống đang xử lý phân dòng dữ liệu trên Google Sheets.');
+        alert('Đăng ký thành công! Hệ thống đang xử lý phân dòng dữ liệu.');
         form.reset();
         document.querySelectorAll('.account-input-wrapper').forEach((w, idx) => { 
             if(idx > 0) w.remove(); 
