@@ -32,7 +32,22 @@ function loadMembers() {
                     <td>${member.fullName || ''}</td>
                     <td>${member.birthYear || ''}</td>
                     <td>${member.accounts || ''}</td>
-                    <td><a class='zalo-link' href='https://zalo.me/${member.zalo}' target='_blank'>${member.zalo || ''}</a></td>
+
+// Chuyển thành chuỗi và ép kiểu chuỗi chữ để xử lý
+let zaloStr = String(member.zalo || '').trim();
+// Nếu số điện thoại bắt đầu bằng số 3, 5, 7, 8, 9 và chỉ có 9 chữ số, tự động bù số 0 vào đầu
+if (zaloStr.length === 9 && /^[35789]/.test(zaloStr)) {
+    zaloStr = '0' + zaloStr;
+}
+
+row.innerHTML = `
+    <td>${member.fullName || ''}</td>
+    <td>${member.birthYear || ''}</td>
+    <td>${member.accounts || ''}</td>
+    <td><a class='zalo-link' href='https://zalo.me/${zaloStr}' target='_blank'>${zaloStr}</a></td>
+    <td style="text-align:center;">${statusHtml}</td>
+`;
+
                     <td style="text-align:center;">${statusHtml}</td>
                 `;
                 tableBody.appendChild(row);
