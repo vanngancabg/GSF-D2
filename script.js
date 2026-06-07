@@ -19,9 +19,9 @@ const rowsPerPage = 20; // Giới hạn đúng 20 dòng mỗi trang
 
 const fullNameInput = document.getElementById('fullName');
 
-// ĐÃ SỬA: Bộ lọc regex Tiếng Việt chuẩn 100% không lo lỗi mất dấu, nuốt chữ khi rời ô hoặc bấm nút đăng ký
+// ĐÃ SỬA TẬN GỐC: Xóa bỏ hoàn toàn lệnh ".replace" tự động khi blur để UniKey/EVKey không bao giờ bị nuốt dấu Tiếng Việt
 fullNameInput.addEventListener('blur', function() {
-    this.value = this.value.replace(/[^a-zA-ZàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđĐ ]/g, '').trim();
+    this.value = this.value.trim(); // Chỉ cắt bỏ khoảng trắng thừa ở đầu/cuối, giữ nguyên 100% chữ có dấu
 });
 
 document.getElementById('birthYear').addEventListener('input', function() {
@@ -250,17 +250,21 @@ searchInput.addEventListener('input', function() {
 form.addEventListener('submit', function(event) {
     event.preventDefault();
     
-    // ĐỐI VỚI HỌ TÊN: Áp dụng bộ lọc Tiếng Việt an toàn sạch sẽ trước khi đóng gói gửi đi
-    let finalCleanName = fullNameInput.value.replace(/[^a-zA-ZàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđĐ ]/g, '').trim();
-    fullNameInput.value = finalCleanName;
+    let rawName = fullNameInput.value.trim();
+
+    // Kiểm tra tính hợp lệ bằng cảnh báo: Nếu chứa số hoặc ký tự đặc biệt thì chặn lại báo lỗi
+    if (/[0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(rawName)) {
+        alert("Lỗi: Họ và tên không được chứa số hoặc ký tự đặc biệt!");
+        return;
+    }
+    if (rawName === "") {
+        alert("Vui lòng nhập họ và tên hợp lệ!");
+        return;
+    }
 
     const birth = document.getElementById('birthYear').value;
     const zaloVal = document.getElementById('zalo').value;
     
-    if(finalCleanName === "") {
-        alert("Vui lòng nhập họ và tên hợp lệ!");
-        return;
-    }
     if(birth.length !== 4 || zaloVal.length !== 10) {
         alert("Vui lòng kiểm tra lại! Năm sinh phải đủ 4 số, Số Zalo phải đủ 10 số.");
         return;
@@ -299,7 +303,7 @@ form.addEventListener('submit', function(event) {
     submitBtn.disabled = true;
 
     const newMember = {
-        fullName: finalCleanName,
+        fullName: rawName,
         birthYear: birth,
         accounts: accountsList,
         zalo: zaloVal
