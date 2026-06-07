@@ -20,7 +20,7 @@ function loadMembers() {
             data.forEach(member => {
                 const row = document.createElement('tr');
                 
-                // Kiểm tra trạng thái cột E từ Google Sheets để hiển thị đẹp hơn
+                // 1. Kiểm tra trạng thái cột E từ Google Sheets để hiển thị nhãn đẹp hơn
                 let statusHtml = '';
                 if (member.status === true || member.status === "TRUE" || member.status === "Rồi") {
                     statusHtml = '<span style="color: #10b981; font-weight: bold;">✔ Đã duyệt</span>';
@@ -28,26 +28,17 @@ function loadMembers() {
                     statusHtml = '<span style="color: #ef4444;">❌ Chưa</span>';
                 }
 
+                // 2. Xử lý tự động bù số 0 bị mất cho cột Zalo khi hiển thị lên Web
+                let zaloStr = String(member.zalo || '').trim();
+                if (zaloStr.length === 9 && /^[35789]/.test(zaloStr)) {
+                    zaloStr = '0' + zaloStr;
+                }
+
                 row.innerHTML = `
                     <td>${member.fullName || ''}</td>
                     <td>${member.birthYear || ''}</td>
                     <td>${member.accounts || ''}</td>
-
-// Chuyển thành chuỗi và ép kiểu chuỗi chữ để xử lý
-let zaloStr = String(member.zalo || '').trim();
-// Nếu số điện thoại bắt đầu bằng số 3, 5, 7, 8, 9 và chỉ có 9 chữ số, tự động bù số 0 vào đầu
-if (zaloStr.length === 9 && /^[35789]/.test(zaloStr)) {
-    zaloStr = '0' + zaloStr;
-}
-
-row.innerHTML = `
-    <td>${member.fullName || ''}</td>
-    <td>${member.birthYear || ''}</td>
-    <td>${member.accounts || ''}</td>
-    <td><a class='zalo-link' href='https://zalo.me/${zaloStr}' target='_blank'>${zaloStr}</a></td>
-    <td style="text-align:center;">${statusHtml}</td>
-`;
-
+                    <td><a class='zalo-link' href='https://zalo.me/${zaloStr}' target='_blank'>${zaloStr}</a></td>
                     <td style="text-align:center;">${statusHtml}</td>
                 `;
                 tableBody.appendChild(row);
@@ -59,11 +50,10 @@ row.innerHTML = `
         });
 }
 
-// Xử lý sự kiện khi bấm nút "Thêm thành viên" gửi lên Google Sheets
+// Xử lý sự kiện khi bấm nút "Đăng ký" để gửi lên Google Sheets
 form.addEventListener('submit', function(event) {
     event.preventDefault();
     
-    // SỬA TẠI ĐÂY: Lấy trực tiếp thẻ button thuộc form thay vì tìm class .submit-btn
     const submitBtn = form.querySelector('button[type="submit"]');
     submitBtn.innerText = 'Đang gửi...';
     submitBtn.disabled = true;
@@ -77,7 +67,7 @@ form.addEventListener('submit', function(event) {
 
     fetch(SCRIPT_URL, {
         method: 'POST',
-        mode: 'no-cors', // Sử dụng chế độ này để tránh lỗi bảo mật CORS khi gọi qua App Script
+        mode: 'no-cors', 
         headers: {
             'Content-Type': 'application/json'
         },
@@ -86,7 +76,7 @@ form.addEventListener('submit', function(event) {
     .then(() => {
         alert('Đăng ký thành công! Dữ liệu đã được gửi lên Google Sheets.');
         form.reset();
-        submitBtn.innerText = 'Đăng ký'; // Sửa lại chữ hiển thị ban đầu của nút
+        submitBtn.innerText = 'Đăng ký';
         submitBtn.disabled = false;
         // Đợi 2 giây rồi load lại bảng để Google kịp cập nhật dữ liệu mới
         setTimeout(loadMembers, 2000);
