@@ -13,7 +13,7 @@ let allMembersData = [];
 // 1. ÉP KIỂU VÀ CHUẨN HÓA DỮ LIỆU NHẬP LIỆU
 // ==========================================
 
-// [Họ và Tên]: KHÔNG lọc khi đang gõ để tránh lỗi Unikey. Chỉ lọc sạch ký tự lạ khi người dùng rời ô nhập.
+// [Họ và Tên]: Cho phép gõ Tiếng Việt tự do, tự động lọc sạch số/ký tự đặc biệt khi rời ô nhập.
 const fullNameInput = document.getElementById('fullName');
 fullNameInput.addEventListener('blur', function() {
     this.value = this.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '').trim();
@@ -33,21 +33,46 @@ document.getElementById('zalo').addEventListener('input', function() {
     this.value = val;
 });
 
-// [HÀM TIỆN ÍCH]: Ép quy tắc cho ô nhập Acc game (Chỉ chữ không dấu, số, tối đa 15 ký tự)
+// [HÀM TIỆN ÍCH]: Ép quy tắc chống nuốt chữ cho Acc Game (Chuyển có dấu -> không dấu, viết thường, max 15 ký tự)
 function applyAccountFieldRestriction(inputField) {
     inputField.addEventListener('input', function() {
-        // Chỉ giữ lại ký tự chữ thường (a-z), chữ hoa (A-Z) và số (0-9)
-        let val = this.value.replace(/[^a-zA-Z0-9]/g, '');
+        let val = this.value;
         
-        // Giới hạn độ dài tối đa là 15 ký tự
+        // Bước A: Chuyển đổi toàn bộ ký tự Tiếng Việt có dấu thành KHÔNG dấu (Cứu UniKey không bị nuốt chữ)
+        val = val.replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, "a");
+        val = val.replace(/[èéẹẻẽêềếệểễ]/g, "e");
+        val = val.replace(/[ìíịỉĩ]/g, "i");
+        val = val.replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, "o");
+        val = val.replace(/[ùúụủũưừứựửữ]/g, "u");
+        val = val.replace(/[ỳýỵỷỹ]/g, "y");
+        val = val.replace(/đ/g, "d");
+        
+        // Chuyển cả chữ HOA có dấu thành không dấu chữ thường
+        val = val.replace(/[ÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴ]/g, "a");
+        val = val.replace(/[ÈÉẸẺẼÊỀẾỆỂỄ]/g, "e");
+        val = val.replace(/[ÌÍỊ|Ĩ]/g, "i");
+        val = val.replace(/[ÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠ]/g, "o");
+        val = val.replace(/[ÙÚỤỦŨƯỪỨỰỬỮ]/g, "u");
+        val = val.replace(/[ỲÝỴỶỸ]/g, "y");
+        val = val.replace(/Đ/g, "d");
+
+        // Bước B: Ép toàn bộ chuỗi về chữ viết thường (lowercase)
+        val = val.toLowerCase();
+
+        // Bước C: Loại bỏ toàn bộ khoảng trắng và ký tự đặc biệt, chỉ giữ lại a-z và 0-9
+        val = val.replace(/[^a-z0-9]/g, '');
+        
+        // Bước D: Cắt ngắn chuỗi nếu vượt quá 15 ký tự
         if (val.length > 15) {
             val = val.slice(0, 15);
         }
+        
+        // Trả lại giá trị sạch vào ô nhập
         this.value = val;
     });
 }
 
-// Áp dụng quy tắc ngay lập tức cho ô nhập Acc game đầu tiên có sẵn trên giao diện
+// Áp dụng ngay cho ô nhập Acc game đầu tiên mặc định
 const firstAccountField = document.querySelector('.account-field');
 if (firstAccountField) {
     applyAccountFieldRestriction(firstAccountField);
@@ -67,12 +92,9 @@ addAccountBtn.addEventListener('click', function() {
     `;
     accountContainer.appendChild(wrapper);
     
-    // Tìm ô nhập Acc game mới vừa được tạo ra
     const newAccountField = wrapper.querySelector('.account-field');
-    // Áp dụng quy tắc chặn chữ có dấu và giới hạn 15 ký tự cho ô mới này
     applyAccountFieldRestriction(newAccountField);
 
-    // Xử lý nút xóa ô nhập
     wrapper.querySelector('.remove-acc-btn').addEventListener('click', function() {
         wrapper.remove();
     });
@@ -162,7 +184,6 @@ searchInput.addEventListener('input', function() {
 form.addEventListener('submit', function(event) {
     event.preventDefault();
     
-    // Quét dọn lần cuối ô Họ Tên để bảo đảm dữ liệu sạch trước khi đẩy lên Google Sheets
     let finalCleanName = fullNameInput.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '').trim();
     fullNameInput.value = finalCleanName;
 
