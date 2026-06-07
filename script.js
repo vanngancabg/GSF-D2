@@ -1,5 +1,5 @@
 // ĐỔI ĐƯỜNG LINK DƯỚI ĐÂY THÀNH LINK WEB APP GOOGLE SHEETS CỦA BẠN (GIỮ NGUYÊN DẤU NGOẶC KÉP)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3ukMrZ0D17rGEXwxZ3f2jzMq_EEnj6goi_z_VrobigC-J4QZqwxpEL4HNDzSKkzQ/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykEzSUm8bnmxp5ypKyJcvv7ugXHIXcWBmF-R4UmS5xg7Q-qi4atCvAn0DBRvCGuJ4s4Q/exec";
 
 const form = document.getElementById('memberForm');
 const tableBody = document.getElementById('memberTableBody');
