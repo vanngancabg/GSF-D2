@@ -178,7 +178,7 @@ form.addEventListener('submit', function(event) {
         body: JSON.stringify(newMember)
     })
     .then(() => {
-        alert('Đăng ký thành công! Đã tự động phân tách mỗi Acc thành một hàng riêng biệt trên Google Sheets.');
+        alert('Đăng ký thành công! Đã tự động phân tách mỗi Acc thành một hàng riêng biệt.');
         
         // Reset form và dọn dẹp các ô nhập Acc game cộng thêm (chỉ giữ lại ô đầu)
         form.reset();
