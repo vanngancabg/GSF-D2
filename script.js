@@ -312,7 +312,7 @@ form.addEventListener('submit', function(event) {
         body: JSON.stringify(newMember) 
     })
     .then(() => {
-        alert('Đăng ký thành công! Dữ liệu đã truyền trực tiếp lên Google Sheets.');
+        alert('Đăng ký thành công! Dữ liệu đã truyền trực tiếp lên trang chủ.');
         form.reset();
         document.querySelectorAll('.account-input-wrapper').forEach((w, idx) => { 
             if(idx > 0) w.remove(); 
