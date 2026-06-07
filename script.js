@@ -1,5 +1,5 @@
 // ĐỔI ĐƯỜNG LINK DƯỚI ĐÂY THÀNH LINK WEB APP GOOGLE SHEETS CỦA BẠN (GIỮ NGUYÊN DẤU NGOẶC KÉP)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykEzSUm8bnmxp5ypKyJcvv7ugXHIXcWBmF-R4UmS5xg7Q-qi4atCvAn0DBRvCGuJ4s4Q/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3ukMrZ0D17rGEXwxZ3f2jzMq_EEnj6goi_z_VrobigC-J4QZqwxpEL4HNDzSKkzQ/exec";
 
 const form = document.getElementById('memberForm');
 const tableBody = document.getElementById('memberTableBody');
@@ -13,7 +13,7 @@ let allMembersData = [];
 // 1. ÉP KIỂU VÀ CHUẨN HÓA DỮ LIỆU NHẬP LIỆU
 // ==========================================
 
-// [Họ và Tên]: Cho phép gõ Tiếng Việt tự do, tự động lọc sạch số/ký tự đặc biệt khi rời ô nhập.
+// [Họ và Tên]: Cho phép gõ tự do, tự động lọc sạch số/ký tự đặc biệt khi rời ô nhập.
 const fullNameInput = document.getElementById('fullName');
 fullNameInput.addEventListener('blur', function() {
     this.value = this.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '').trim();
@@ -33,46 +33,44 @@ document.getElementById('zalo').addEventListener('input', function() {
     this.value = val;
 });
 
-// [HÀM TIỆN ÍCH]: Ép quy tắc chống nuốt chữ cho Acc Game (Chuyển có dấu -> không dấu, viết thường, max 15 ký tự)
+// [HÀM TIỆN ÍCH]: Chuyển chuỗi có dấu thành không dấu, viết thường, loại bỏ khoảng trắng và ký tự đặc biệt
+function cleanAccountText(text) {
+    let str = text;
+    // Chuyển chữ có dấu thành không dấu
+    str = str.replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, "a");
+    str = str.replace(/[èéẹẻẽêềếệểễ]/g, "e");
+    str = str.replace(/[ìíịỉĩ]/g, "i");
+    str = str.replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, "o");
+    str = str.replace(/[ùúụủũưừứựửữ]/g, "u");
+    str = str.replace(/[ỳýỵỷỹ]/g, "y");
+    str = str.replace(/đ/g, "d");
+    str = str.replace(/[ÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴ]/g, "a");
+    str = str.replace(/[ÈÉẸẺẼÊỀẾỆỂỄ]/g, "e");
+    str = str.replace(/[ÌÍỊỈĨ]/g, "i");
+    str = str.replace(/[ÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠ]/g, "o");
+    str = str.replace(/[ÙÚỤỦŨƯỪỨỰỬỮ]/g, "u");
+    str = str.replace(/[ỲÝỴỶỸ]/g, "y");
+    str = str.replace(/Đ/g, "d");
+    
+    // Ép về chữ thường
+    str = str.toLowerCase();
+    // Xóa khoảng trắng và ký tự đặc biệt, chỉ giữ lại chữ cái a-z và số 0-9
+    str = str.replace(/[^a-z0-9]/g, '');
+    // Cắt chuỗi lấy tối đa 15 ký tự
+    if (str.length > 15) {
+        str = str.slice(0, 15);
+    }
+    return str;
+}
+
+// Đối với các ô Acc game: KHÔNG lọc khi đang gõ (tránh lỗi nuốt chữ của UniKey), chỉ lọc sạch khi nhấn chuột ra ngoài ô nhập
 function applyAccountFieldRestriction(inputField) {
-    inputField.addEventListener('input', function() {
-        let val = this.value;
-        
-        // Bước A: Chuyển đổi toàn bộ ký tự Tiếng Việt có dấu thành KHÔNG dấu (Cứu UniKey không bị nuốt chữ)
-        val = val.replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, "a");
-        val = val.replace(/[èéẹẻẽêềếệểễ]/g, "e");
-        val = val.replace(/[ìíịỉĩ]/g, "i");
-        val = val.replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, "o");
-        val = val.replace(/[ùúụủũưừứựửữ]/g, "u");
-        val = val.replace(/[ỳýỵỷỹ]/g, "y");
-        val = val.replace(/đ/g, "d");
-        
-        // Chuyển cả chữ HOA có dấu thành không dấu chữ thường
-        val = val.replace(/[ÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴ]/g, "a");
-        val = val.replace(/[ÈÉẸẺẼÊỀẾỆỂỄ]/g, "e");
-        val = val.replace(/[ÌÍỊ|Ĩ]/g, "i");
-        val = val.replace(/[ÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠ]/g, "o");
-        val = val.replace(/[ÙÚỤỦŨƯỪỨỰỬỮ]/g, "u");
-        val = val.replace(/[ỲÝỴỶỸ]/g, "y");
-        val = val.replace(/Đ/g, "d");
-
-        // Bước B: Ép toàn bộ chuỗi về chữ viết thường (lowercase)
-        val = val.toLowerCase();
-
-        // Bước C: Loại bỏ toàn bộ khoảng trắng và ký tự đặc biệt, chỉ giữ lại a-z và 0-9
-        val = val.replace(/[^a-z0-9]/g, '');
-        
-        // Bước D: Cắt ngắn chuỗi nếu vượt quá 15 ký tự
-        if (val.length > 15) {
-            val = val.slice(0, 15);
-        }
-        
-        // Trả lại giá trị sạch vào ô nhập
-        this.value = val;
+    inputField.addEventListener('blur', function() {
+        this.value = cleanAccountText(this.value);
     });
 }
 
-// Áp dụng ngay cho ô nhập Acc game đầu tiên mặc định
+// Áp dụng ngay cho ô nhập Acc game mặc định đầu tiên
 const firstAccountField = document.querySelector('.account-field');
 if (firstAccountField) {
     applyAccountFieldRestriction(firstAccountField);
@@ -184,6 +182,7 @@ searchInput.addEventListener('input', function() {
 form.addEventListener('submit', function(event) {
     event.preventDefault();
     
+    // Chuẩn hóa dọn dẹp sạch sẽ ô Họ Tên
     let finalCleanName = fullNameInput.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '').trim();
     fullNameInput.value = finalCleanName;
 
@@ -191,7 +190,7 @@ form.addEventListener('submit', function(event) {
     const zaloVal = document.getElementById('zalo').value;
     
     if(finalCleanName === "") {
-        alert("Vui lòng nhập họ và tên hợp lệ (chỉ chứa ký tự chữ)!");
+        alert("Vui lòng nhập họ và tên hợp lệ!");
         return;
     }
     if(birth.length !== 4 || zaloVal.length !== 10) {
@@ -203,11 +202,23 @@ form.addEventListener('submit', function(event) {
     submitBtn.innerText = 'Đang đồng bộ đăng ký...';
     submitBtn.disabled = true;
 
+    // Tiến hành quét dọn và chuẩn hóa sạch sẽ Từng ô nhập Acc game ngay trước khi đóng gói gửi đi
     const accountFields = document.querySelectorAll('.account-field');
     const accountsList = [];
     accountFields.forEach(f => { 
-        if(f.value.trim() !== "") accountsList.push(f.value.trim()); 
+        let cleanedAcc = cleanAccountText(f.value);
+        f.value = cleanedAcc; // hiển thị lại chữ đã làm sạch trên form
+        if(cleanedAcc !== "") {
+            accountsList.push(cleanedAcc); 
+        }
     });
+
+    if(accountsList.length === 0) {
+        alert("Vui lòng nhập ít nhất một tên Acc game hợp lệ!");
+        submitBtn.innerText = 'Gửi Đăng Ký Tham Gia';
+        submitBtn.disabled = false;
+        return;
+    }
 
     const newMember = {
         fullName: finalCleanName,
