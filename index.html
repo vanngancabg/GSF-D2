@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GSF Group -Vnn</title>
+    <title>GSF Group -Vnn | Median XL Việt Nam</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,73 +12,105 @@
 <div class="container">
 
     <header class="hero">
-        <div class="badge">Median XL - Group Self Found</div>
-        <h1>GSF Group “-Vnn”</h1>
-        <p>Cộng đồng Group Self Found dành cho người chơi Median XL Việt Nam.</p>
+        <div class="badge">⚔️ Median XL - Group Self Found</div>
+        <h1>GSF Group <span class="highlight-text">“-Vnn”</span></h1>
+        <p class="hero-desc">Hệ thống đăng ký và quản lý thành viên chính thức dành cho cộng đồng tự lực cánh sinh Median XL Việt Nam.</p>
         <div class="links">
-            <a href="https://discord.gg/x46ED3UqPU" target="_blank">Discord</a>
-            <a href="https://zalo.me/g/d36guyrwhqdrrauytv4x" target="_blank">Nhóm Zalo</a>
-            <a href="https://median-xl.com/gsf/gsf_manage.php" target="_blank">Quản lý Group và tìm kiếm đồ</a>
+            <a href="https://discord.gg/x46ED3UqPU" target="_blank" class="btn-discord">💬 Discord</a>
+            <a href="https://zalo.me/g/d36guyrwhqdrrauytv4x" target="_blank" class="btn-zalo">📱 Nhóm Zalo</a>
+            <a href="https://median-xl.com/gsf/gsf_manage.php" target="_blank" class="btn-manage">📦 Group và tìm kiếm đồ</a>
         </div>
     </header>
 
-    <section class="guide">
-        <h2>📖 Hướng dẫn tham gia</h2>
-        <p><strong>Bước 1:</strong> Điền đầy đủ thông tin bên dưới, ấn đăng ký và truy cập nhóm zalo, tag chủ nhóm.</p>
-        <p><strong>Bước 2:</strong> Chờ Chủ nhóm, Founder hoặc Officer gửi lời mời.</p>
-        <p><strong>Bước 3:</strong> Truy cập trang Quản lý Group phía trên, đăng nhập từng acc của bạn và xác nhận tham gia.</p>
-        <p><strong>Bước 4:</strong> Tạo nhân vật có đuôi tên <strong>-Vnn</strong>.</p>
+    <section class="dashboard-stats">
+        <div class="stat-card">
+            <span class="stat-label">Tổng số tài khoản</span>
+            <span class="stat-value" id="totalAccs">0</span>
+        </div>
+        <div class="stat-card approved">
+            <span class="stat-label">Đã là thành viên</span>
+            <span class="stat-value" id="approvedAccs">0</span>
+        </div>
+        <div class="stat-card pending">
+            <span class="stat-label">Đang chờ duyệt</span>
+            <span class="stat-value" id="pendingAccs">0</span>
+        </div>
     </section>
 
-    <section class="layout">
-        <div class="left card">
-            <h2>📝 Đăng ký tham gia</h2>
-            <form id="memberForm">
-                <label>Họ và tên</label>
-                <input type="text" id="fullName" placeholder="Nhập họ và tên (chỉ nhập chữ)" required>
+    <div class="main-layout">
+        
+        <div class="sidebar-area">
+            <section class="card guide-card">
+                <h2>📖 Quy trình tham gia</h2>
+                <ul class="steps-list">
+                    <li><span class="step-num">1</span> Điền thông tin chính xác vào form bên dưới.</li>
+                    <li><span class="step-num">2</span> Chờ Ban Quản Trị kiểm tra thông tin.</li>
+                    <li><span class="step-num">3</span> Đăng nhập web Median XL, chấp nhận lời mời vào nhóm.</li>
+                    <li><span class="step-num">4</span> Tạo nhân vật bắt buộc có đuôi tên <strong style="color: #f59e0b;">-Vnn</strong>.</li>
+                </ul>
+            </section>
 
-                <label>Năm sinh</label>
-                <input type="text" id="birthYear" placeholder="Ví dụ: 1998 (đúng 4 số)" required>
-
-                <label>Tên Acc game</label>
-                <div id="accountInputContainer">
-                    <div class="account-input-wrapper">
-                        <input type="text" class="account-field" placeholder="Nhập tên Acc game" required>
-                        <button type="button" id="addAccountBtn" class="add-acc-btn">+</button>
+            <section class="card form-card">
+                <h2>📝 Form Đăng Ký</h2>
+                <form id="memberForm">
+                    <div class="input-group">
+                        <label for="fullName">Họ và tên</label>
+                        <input type="text" id="fullName" placeholder="Nhập họ tên (chỉ chữ)" required autocomplete="off">
                     </div>
-                </div>
 
-                <label>Số điện thoại Zalo</label>
-                <input type="text" id="zalo" placeholder="Ví dụ: 0936xxxxxx (10 số, bắt đầu bằng 0)" required>
+                    <div class="input-group">
+                        <label for="birthYear">Năm sinh</label>
+                        <input type="text" id="birthYear" placeholder="Ví dụ: 1998 (đúng 4 số)" required autocomplete="off">
+                    </div>
 
-                <button type="submit" class="submit-main-btn">Đăng ký</button>
-            </form>
+                    <div class="input-group">
+                        <label>Tên Acc game</label>
+                        <div id="accountInputContainer">
+                            <div class="account-input-wrapper">
+                                <input type="text" class="account-field" placeholder="Nhập tên tài khoản game" required autocomplete="off">
+                                <button type="button" id="addAccountBtn" class="add-acc-btn">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="zalo">Số điện thoại Zalo</label>
+                        <input type="text" id="zalo" placeholder="Số điện thoại bắt đầu bằng số 0" required autocomplete="off">
+                    </div>
+
+                    <button type="submit" class="submit-main-btn">Gửi Đăng Ký Tham Gia</button>
+                </form>
+            </section>
         </div>
 
-        <div class="right card">
-            <h2>👥 Danh sách thành viên</h2>
-            
-            <div class="search-box-wrapper">
-                <input type="text" id="searchAccount" placeholder="🔍 Nhập tên Acc game để tìm kiếm nhanh...">
+        <main class="content-area card list-card">
+            <div class="list-header">
+                <h2>👥 Danh Sách Thành Viên</h2>
+                <div class="search-box">
+                    <input type="text" id="searchAccount" placeholder="🔍 Tìm nhanh theo tên Acc game...">
+                </div>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Họ tên</th>
-                        <th>Năm sinh</th>
-                        <th>Acc game</th>
-                        <th>Zalo</th>
-                        <th>Đã là thành viên</th>
-                    </tr>
-                </thead>
-                <tbody id="memberTableBody">
-                    <tr><td colspan="5" style="text-align:center;">Đang tải danh sách...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">STT</th>
+                            <th>Họ và tên</th>
+                            <th>Năm sinh</th>
+                            <th>Tên Acc Game</th>
+                            <th>Zalo Liên Hệ</th>
+                            <th>Trạng Thái</th>
+                        </tr>
+                    </thead>
+                    <tbody id="memberTableBody">
+                        <tr><td colspan="6" style="text-align:center; color: #64748b;">Đang kết nối cơ sở dữ liệu...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
 
+    </div>
 </div>
 
 <script src="script.js"></script>
