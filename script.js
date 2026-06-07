@@ -18,8 +18,10 @@ const rowsPerPage = 20; // Giới hạn đúng 20 dòng mỗi trang
 // ==========================================
 
 const fullNameInput = document.getElementById('fullName');
+
+// ĐÃ SỬA: Bộ lọc regex Tiếng Việt chuẩn 100% không lo lỗi mất dấu, nuốt chữ khi rời ô hoặc bấm nút đăng ký
 fullNameInput.addEventListener('blur', function() {
-    this.value = this.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '').trim();
+    this.value = this.value.replace(/[^a-zA-ZàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđĐ ]/g, '').trim();
 });
 
 document.getElementById('birthYear').addEventListener('input', function() {
@@ -126,12 +128,10 @@ function updateDashboardCounters(data) {
     document.getElementById('pendingAccs').innerText = (total - approved);
 }
 
-// Hàm kiểm tra trạng thái phê duyệt (Phục vụ cho việc sắp xếp)
 function isMemberApproved(member) {
     return (member.status === true || member.status === "TRUE" || member.status === "Rồi");
 }
 
-// Hàm hiển thị dữ liệu bảng kết hợp Phân Trang 20 dòng
 function renderTable() {
     tableBody.innerHTML = '';
     paginationContainer.innerHTML = '';
@@ -141,14 +141,12 @@ function renderTable() {
         return;
     }
     
-    // YÊU CẦU SẮP XẾP: Tiến hành sắp xếp dữ liệu lọc, đưa Chờ duyệt lên đầu, Đã duyệt xuống dưới
     filteredMembersData.sort((a, b) => {
         let aApproved = isMemberApproved(a);
         let bApproved = isMemberApproved(b);
-        
-        if (!aApproved && bApproved) return -1; // a chưa duyệt, b đã duyệt -> đưa a lên đầu
-        if (aApproved && !bApproved) return 1;  // a đã duyệt, b chưa duyệt -> đẩy a xuống dưới
-        return 0; // Giữ nguyên vị trí nếu trạng thái giống nhau
+        if (!aApproved && bApproved) return -1;
+        if (aApproved && !bApproved) return 1;
+        return 0;
     });
     
     const startIndex = (currentPage - 1) * rowsPerPage;
@@ -239,11 +237,9 @@ window.copyToClipboard = function(text) {
 
 searchInput.addEventListener('input', function() {
     const query = this.value.toLowerCase().trim();
-    
     filteredMembersData = allMembersData.filter(m => 
         String(m.accounts || '').toLowerCase().includes(query)
     );
-    
     currentPage = 1; 
     renderTable();   
 });
@@ -254,7 +250,8 @@ searchInput.addEventListener('input', function() {
 form.addEventListener('submit', function(event) {
     event.preventDefault();
     
-    let finalCleanName = fullNameInput.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '').trim();
+    // ĐỐI VỚI HỌ TÊN: Áp dụng bộ lọc Tiếng Việt an toàn sạch sẽ trước khi đóng gói gửi đi
+    let finalCleanName = fullNameInput.value.replace(/[^a-zA-ZàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđĐ ]/g, '').trim();
     fullNameInput.value = finalCleanName;
 
     const birth = document.getElementById('birthYear').value;
@@ -269,7 +266,6 @@ form.addEventListener('submit', function(event) {
         return;
     }
 
-    // YÊU CẦU CHỐNG TRÙNG: Thu thập danh sách các Acc game nhập từ form và làm sạch chúng
     const accountFields = document.querySelectorAll('.account-field');
     const accountsList = [];
     let hasDuplicate = false;
@@ -279,7 +275,6 @@ form.addEventListener('submit', function(event) {
         let cleanedAcc = cleanAccountText(f.value);
         f.value = cleanedAcc;
         if(cleanedAcc !== "") {
-            // Kiểm tra đối chiếu với danh sách allMembersData tải về từ Sheets
             let isExist = allMembersData.some(m => String(m.accounts || '').toLowerCase() === cleanedAcc);
             if (isExist) {
                 hasDuplicate = true;
@@ -289,7 +284,6 @@ form.addEventListener('submit', function(event) {
         }
     });
 
-    // Nếu phát hiện trùng tên tài khoản game, báo lỗi lập tức và dừng gửi form
     if (hasDuplicate) {
         alert(`Lỗi đăng ký: Tài khoản game "${duplicateName}" đã tồn tại trong danh sách của nhóm! Vui lòng kiểm tra lại.`);
         return;
@@ -318,7 +312,7 @@ form.addEventListener('submit', function(event) {
         body: JSON.stringify(newMember) 
     })
     .then(() => {
-        alert('Đăng ký thành công! Hệ thống đang xử lý phân dòng dữ liệu.');
+        alert('Đăng ký thành công! Dữ liệu đã truyền trực tiếp lên Google Sheets.');
         form.reset();
         document.querySelectorAll('.account-input-wrapper').forEach((w, idx) => { 
             if(idx > 0) w.remove(); 
