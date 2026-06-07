@@ -3,141 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Quản Lý Thành Viên Median XL</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>GSF Group -Vnn | Median XL Việt Nam</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="particles-js"></div>
 
-    <div class="container">
-        <header class="main-banner">
-            <h1 class="animate-charcter">MEDIAN XL VIỆT NAM</h1>
-        </header>
+<div class="container">
 
-        <main class="main-content">
-            <section class="card-panel registration-section">
-                <div class="panel-header">
-                    <h2><i class="fa-solid fa-user-plus"></i> <span id="form-title">Đăng Ký Thành Viên</span></h2>
-                    <p class="panel-subtitle">Vui lòng nhập đầy đủ và chính xác thông tin nhân vật của bạn</p>
+    <header class="hero">
+        <div class="badge">⚔️ Median XL - Group Self Found</div>
+        <h1>GSF Group <span class="highlight-text">“-Vnn”</span></h1>
+        
+        <div class="gsf-info-box" style="margin: 20px auto; max-width: 800px; text-align: left; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.15); font-size: 14px; line-height: 1.6;">
+            <p style="margin-top: 0; color: #fff; font-weight: 600; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">🎮 Chế độ chơi GSF là gì?</p>
+            <p style="color: var(--text-muted); margin: 8px 0;">Là chế độ chơi <strong>Online</strong> nội bộ dành riêng cho một nhóm người cùng chí hướng.</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 12px;">
+                <div>
+                    <strong style="color: var(--danger);">🛑 Khó khăn:</strong>
+                    <p style="color: var(--text-muted); margin: 4px 0 0 0;">Tự làm khó bản thân, nói không với việc mua bán thương mại bên ngoài.</p>
                 </div>
-                
-                <form id="member-form" autocomplete="off">
-                    <input type="hidden" id="member-id">
+                <div>
+                    <strong style="color: var(--success);">🔥 Thuận lợi:</strong>
+                    <p style="color: var(--text-muted); margin: 4px 0 0 0;">Đồ có thể đi xin anh em trong nhóm; dễ dàng tìm kiếm, lọc xem món đồ mình cần ai đang giữ để sang "xin" 🤝</p>
+                </div>
+            </div>
+        </div>
 
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="discord-name"><i class="fa-brands fa-discord"></i> Tên Tài Khoản Discord <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <input type="text" id="discord-name" placeholder="Ví dụ: Perfect_Kain" required>
-                                <span class="input-focus-line"></span>
-                            </div>
-                            <small class="form-help">Tên chính xác hiển thị trên server Discord</small>
-                        </div>
+        <p class="hero-desc">Hệ thống đăng ký và quản lý thành viên chính thức dành cho cộng đồng tự lực cánh sinh Median XL.</p>
+        <div class="links">
+            <a href="https://discord.gg/x46ED3UqPU" target="_blank" class="btn-discord">💬 Discord</a>
+            <a href="https://zalo.me/g/d36guyrwhqdrrauytv4x" target="_blank" class="btn-zalo">📱 Nhóm Zalo</a>
+            <a href="https://median-xl.com/gsf/gsf_manage.php" target="_blank" class="btn-manage">📦 Quản lý Group và tìm kiếm đồ</a>
+        </div>
+    </header>
 
-                        <div class="form-group">
-                            <label for="ingame-name"><i class="fa-solid fa-gamepad"></i> Tên Nhân Vật Trong Game <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <input type="text" id="ingame-name" placeholder="Ví dụ: Siegfried_Vn" required>
-                                <span class="input-focus-line"></span>
-                            </div>
-                            <small class="form-help">Tên nhân vật chính bạn đang sử dụng</small>
-                        </div>
+    <section class="dashboard-stats">
+        <div class="stat-card">
+            <span class="stat-label">Tổng số tài khoản</span>
+            <span class="stat-value" id="totalAccs">0</span>
+        </div>
+        <div class="stat-card approved">
+            <span class="stat-label">Đã duyệt tham gia</span>
+            <span class="stat-value" id="approvedAccs">0</span>
+        </div>
+        <div class="stat-card pending">
+            <span class="stat-label">Đang chờ xử lý</span>
+            <span class="stat-value" id="pendingAccs">0</span>
+        </div>
+    </section>
 
-                        <div class="form-group">
-                            <label for="character-class"><i class="fa-solid fa-wand-magic-sparkles"></i> Class Nhân Vật <span class="required">*</span></label>
-                            <div class="input-wrapper custom-select">
-                                <select id="character-class" required>
-                                    <option value="" disabled selected>-- Chọn Class --</option>
-                                    <option value="Amazon">Amazon</option>
-                                    <option value="Assassin">Assassin</option>
-                                    <option value="Barbarian">Barbarian</option>
-                                    <option value="Druid">Druid</option>
-                                    <option value="Necromancer">Necromancer</option>
-                                    <option value="Paladin">Paladin</option>
-                                    <option value="Sorceress">Sorceress</option>
-                                </select>
-                                <i class="fa-solid fa-chevron-down select-icon"></i>
-                            </div>
-                        </div>
+    <div class="main-layout">
+        <div class="sidebar-area">
+            <section class="card guide-card">
+                <h2>📖 Quy trình tham gia</h2>
+                <ul class="steps-list">
+                    <li><span class="step-num">1</span> Điền thông tin chính xác vào form bên dưới.</li>
+                    <li><span class="step-num">2</span> Chờ Ban Quản Trị kiểm tra thông tin.</li>
+                    <li><span class="step-num">3</span> Đăng nhập web Median XL, chấp nhận lời mời vào nhóm.</li>
+                    <li><span class="step-num">4</span> Tạo nhân vật bắt buộc có đuôi tên <strong style="color: #f59e0b;">-Vnn</strong>.</li>
+                </ul>
+            </section>
 
-                        <div class="form-group">
-                            <label for="build-type"><i class="fa-solid fa-shield-halved"></i> Kiểu Build Hiện Tại <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <input type="text" id="build-type" placeholder="Ví dụ: Melee Sorc, Unholy Pal, Totem Nec..." required>
-                                <span class="input-focus-line"></span>
+            <section class="card form-card">
+                <h2>📝 Form Đăng Ký</h2>
+                <form id="memberForm">
+                    <div class="input-group">
+                        <label for="fullName">Họ và tên</label>
+                        <input type="text" id="fullName" placeholder="Nhập họ và tên của bạn" required autocomplete="off">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="birthYear">Năm sinh</label>
+                        <input type="text" id="birthYear" placeholder="Ví dụ: 1998 (đúng 4 số)" required autocomplete="off">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Tên Acc game</label>
+                        <div id="accountInputContainer">
+                            <div class="account-input-wrapper">
+                                <input type="text" class="account-field" placeholder="Nhập tên tài khoản game" required autocomplete="off">
+                                <button type="button" id="addAccountBtn" class="add-acc-btn">+</button>
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-actions">
-                        <button type="button" id="btn-cancel" class="btn btn-secondary hidden">
-                            <i class="fa-solid fa-xmark"></i> Hủy Cập Nhật
-                        </button>
-                        <button type="submit" id="btn-submit" class="btn btn-primary">
-                            <i class="fa-solid fa-paper-plane"></i> <span id="submit-text">Gửi Đăng Ký</span>
-                        </button>
+                    <div class="input-group">
+                        <label for="zalo">Số điện thoại Zalo</label>
+                        <input type="text" id="zalo" placeholder="Số điện thoại bắt đầu bằng số 0" required autocomplete="off">
                     </div>
+
+                    <button type="submit" class="submit-main-btn">Gửi Đăng Ký Tham Gia</button>
                 </form>
             </section>
+        </div>
 
-            <section class="card-panel list-section">
-                <div class="panel-header list-header-flex">
-                    <div>
-                        <h2><i class="fa-solid fa-users"></i> Danh Sách Thành Viên</h2>
-                        <p class="panel-subtitle">Danh sách chiến binh đang tham gia cộng đồng</p>
-                    </div>
-                    <div class="search-box">
-                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                        <input type="text" id="search-input" placeholder="Tìm kiếm Discord, Ingame, Class...">
-                    </div>
+        <main class="content-area card list-card">
+            <div class="list-header">
+                <h2>👥 Danh Sách Thành Viên</h2>
+                <div class="search-box">
+                    <input type="text" id="searchAccount" placeholder="🔍 Tìm nhanh theo tên Acc game...">
                 </div>
+            </div>
 
-                <div class="class-filters">
-                    <button class="filter-btn active" data-class="all">Tất Cả</button>
-                    <button class="filter-btn" data-class="Amazon">Amazon</button>
-                    <button class="filter-btn" data-class="Assassin">Assassin</button>
-                    <button class="filter-btn" data-class="Barbarian">Barbarian</button>
-                    <button class="filter-btn" data-class="Druid">Druid</button>
-                    <button class="filter-btn" data-class="Necromancer">Necromancer</button>
-                    <button class="filter-btn" data-class="Paladin">Paladin</button>
-                    <button class="filter-btn" data-class="Sorceress">Sorceress</button>
-                </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">STT</th>
+                            <th>Họ và tên</th>
+                            <th>Năm sinh</th>
+                            <th>Tên Acc Game</th>
+                            <th>Zalo Liên Hệ</th>
+                            <th>Trạng Thái</th>
+                        </tr>
+                    </thead>
+                    <tbody id="memberTableBody">
+                        <tr><td colspan="6" style="text-align:center; color: #64748b;">Đang kết nối cơ sở dữ liệu...</td></tr>
+                    </tbody>
+                </table>
+            </div>
 
-                <div class="stats-bar">
-                    <span class="stat-item"><i class="fa-solid fa-user-shield"></i> Tổng số: <strong id="total-count">0</strong></span>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="member-table">
-                        <thead>
-                            <tr>
-                                <th>STT</th>
-                                <th><i class="fa-brands fa-discord"></i> Tên Discord</th>
-                                <th><i class="fa-solid fa-gamepad"></i> Tên Ingame</th>
-                                <th><i class="fa-solid fa-wand-magic-sparkles"></i> Class</th>
-                                <th><i class="fa-solid fa-shield-halved"></i> Kiểu Build</th>
-                                <th><i class="fa-solid fa-calendar-days"></i> Ngày Đăng Ký</th>
-                                <th class="text-center"><i class="fa-solid fa-gear"></i> Thao Tác</th>
-                            </tr>
-                        </thead>
-                        <tbody id="member-table-body">
-                            <tr>
-                                <td colspan="7" class="text-center table-loading">
-                                    <i class="fa-solid fa-spinner fa-spin"></i> Đang tải danh sách thành viên...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+            <div id="pagination" class="pagination-container"></div>
         </main>
     </div>
+</div>
 
-    <div id="toast-container"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-    <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
