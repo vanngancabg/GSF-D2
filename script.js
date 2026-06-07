@@ -1,4 +1,5 @@
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3ukMrZ0D17rGEXwxZ3f2jzMq_EEnj6goi_z_VrobigC-J4QZqwxpEL4HNDzSKkzQ/exec";
+// ĐỔI ĐƯỜNG LINK DƯỚI ĐÂY THÀNH LINK WEB APP GOOGLE SHEETS CỦA BẠN (GIỮ NGUYÊN DẤU NGOẶC KÉP)
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykEzSUm8bnmxp5ypKyJcvv7ugXHIXcWBmF-R4UmS5xg7Q-qi4atCvAn0DBRvCGuJ4s4Q/exec";
 
 const form = document.getElementById('memberForm');
 const tableBody = document.getElementById('memberTableBody');
@@ -9,7 +10,7 @@ const searchInput = document.getElementById('searchAccount');
 let allMembersData = []; 
 
 // ==========================================
-// ÉP KIỂU NHẬP LIỆU NGAY KHI GÕ
+// 1. ÉP KIỂU NHẬP LIỆU NGAY KHI GÕ CHẶN KÝ TỰ LỖI
 // ==========================================
 document.getElementById('fullName').addEventListener('input', function() {
     this.value = this.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '');
@@ -28,7 +29,7 @@ document.getElementById('zalo').addEventListener('input', function() {
 });
 
 // ==========================================
-// THÊM/XÓA Ô NHẬP ACC GAME
+// 2. THÊM / XÓA Ô NHẬP LIỆU ACC GAME
 // ==========================================
 addAccountBtn.addEventListener('click', function() {
     const wrapper = document.createElement('div');
@@ -39,11 +40,13 @@ addAccountBtn.addEventListener('click', function() {
         <button type="button" class="remove-acc-btn">-</button>
     `;
     accountContainer.appendChild(wrapper);
-    wrapper.querySelector('.remove-acc-btn').addEventListener('click', () => wrapper.remove());
+    wrapper.querySelector('.remove-acc-btn').addEventListener('click', function() {
+        wrapper.remove();
+    });
 });
 
 // ==========================================
-// TẢI DỮ LIỆU & TÍNH TOÁN THỐNG KÊ
+// 3. TẢI VÀ ĐỒNG BỘ DỮ LIỆU THỐNG KÊ
 // ==========================================
 function loadMembers() {
     fetch(SCRIPT_URL)
@@ -54,8 +57,8 @@ function loadMembers() {
             renderTable(data);
         })
         .catch(error => {
-            console.error('Lỗi:', error);
-            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#ef4444;">Lỗi tải dữ liệu danh sách!</td></tr>';
+            console.error('Lỗi tải dữ liệu:', error);
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#ef4444;">Không thể kết nối đến dữ liệu Google Sheets!</td></tr>';
         });
 }
 
@@ -64,7 +67,9 @@ function updateDashboardCounters(data) {
     let approved = 0;
     
     data.forEach(m => {
-        if (m.status === true || m.status === "TRUE" || m.status === "Rồi") approved++;
+        if (m.status === true || m.status === "TRUE" || m.status === "Rồi") {
+            approved++;
+        }
     });
     
     document.getElementById('totalAccs').innerText = total;
@@ -75,7 +80,7 @@ function updateDashboardCounters(data) {
 function renderTable(dataList) {
     tableBody.innerHTML = '';
     if(dataList.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: #64748b;">Không tìm thấy tài khoản nào phù hợp.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: #64748b;">Không tìm thấy kết quả phù hợp.</td></tr>';
         return;
     }
     
@@ -90,7 +95,9 @@ function renderTable(dataList) {
         if (!isApproved) row.className = 'row-pending';
 
         let zaloStr = String(member.zalo || '').trim();
-        if (zaloStr.length === 9 && /^[35789].test(zaloStr)) zaloStr = '0' + zaloStr;
+        if (zaloStr.length === 9 && /^[35789]/.test(zaloStr)) {
+            zaloStr = '0' + zaloStr;
+        }
 
         row.innerHTML = `
             <td style="color: #64748b; font-weight: 500;">${index + 1}</td>
@@ -99,7 +106,7 @@ function renderTable(dataList) {
             <td>
                 <div class="acc-cell">
                     <span class="acc-name">${member.accounts || ''}</span>
-                    <button class="btn-copy-mini" onclick="copyToClipboard('${member.accounts}')" title="Copy tên Acc">📋</button>
+                    <button type="button" class="btn-copy-mini" onclick="copyToClipboard('${member.accounts}')" title="Copy tài khoản">📋</button>
                 </div>
             </td>
             <td><a class='zalo-link-row' href='https://zalo.me/${zaloStr}' target='_blank'>💬 ${zaloStr}</a></td>
@@ -109,38 +116,42 @@ function renderTable(dataList) {
     });
 }
 
-// Hàm hỗ trợ copy nhanh tên tài khoản
+// Tính năng click copy nhanh tên Acc game
 window.copyToClipboard = function(text) {
     navigator.clipboard.writeText(text).then(() => {
         alert(`Đã copy tài khoản: ${text}`);
-    }).catch(err => console.error('Không thể copy', err));
+    }).catch(err => console.error('Lỗi sao chép:', err));
 }
 
-// BỘ LỌC TÌM KIẾM
+// THANH LỌC TÌM KIẾM
 searchInput.addEventListener('input', function() {
     const query = this.value.toLowerCase().trim();
     const filtered = allMembersData.filter(m => String(m.accounts || '').toLowerCase().includes(query));
     renderTable(filtered);
 });
 
-// GỬI DATA FORM ĐĂNG KÝ
+// ==========================================
+// 4. THAO TÁC GỬI ĐĂNG KÝ MỚI
+// ==========================================
 form.addEventListener('submit', function(event) {
     event.preventDefault();
     const birth = document.getElementById('birthYear').value;
     const zaloVal = document.getElementById('zalo').value;
     
     if(birth.length !== 4 || zaloVal.length !== 10) {
-        alert("Vui lòng kiểm tra lại độ dài Năm sinh (4 số) hoặc Số Zalo (10 số)!");
+        alert("Vui lòng kiểm tra lại! Năm sinh phải đủ 4 số, Số Zalo phải đủ 10 số.");
         return;
     }
 
     const submitBtn = form.querySelector('.submit-main-btn');
-    submitBtn.innerText = 'Đang gửi thông tin đăng ký...';
+    submitBtn.innerText = 'Đang đồng bộ đăng ký...';
     submitBtn.disabled = true;
 
     const accountFields = document.querySelectorAll('.account-field');
     const accountsList = [];
-    accountFields.forEach(f => { if(f.value.trim() !== "") accountsList.push(f.value.trim()); });
+    accountFields.forEach(f => { 
+        if(f.value.trim() !== "") accountsList.push(f.value.trim()); 
+    });
 
     const newMember = {
         fullName: document.getElementById('fullName').value.trim(),
@@ -149,21 +160,29 @@ form.addEventListener('submit', function(event) {
         zalo: zaloVal
     };
 
-    fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newMember) })
+    fetch(SCRIPT_URL, { 
+        method: 'POST', 
+        mode: 'no-cors', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify(newMember) 
+    })
     .then(() => {
-        alert('Đăng ký thành công! Đang đồng bộ hóa dữ liệu hệ thống.');
+        alert('Đăng ký thành công! Hệ thống đang xử lý phân dòng dữ liệu trên Google Sheets.');
         form.reset();
-        document.querySelectorAll('.account-input-wrapper').forEach((w, idx) => { if(idx > 0) w.remove(); });
+        document.querySelectorAll('.account-input-wrapper').forEach((w, idx) => { 
+            if(idx > 0) w.remove(); 
+        });
         submitBtn.innerText = 'Gửi Đăng Ký Tham Gia';
         submitBtn.disabled = false;
-        setTimeout(loadMembers, 2000);
+        setTimeout(loadMembers, 2500); // Reload bảng sau 2.5s để Google kịp đồng bộ
     })
     .catch(error => {
-        console.error(error);
-        alert('Có lỗi hệ thống xảy ra!');
+        console.error('Lỗi gửi form:', error);
+        alert('Có lỗi hệ thống kết nối xảy ra!');
         submitBtn.innerText = 'Gửi Đăng Ký Tham Gia';
         submitBtn.disabled = false;
     });
 });
 
+// Chạy tải danh sách lần đầu khi mở trang web
 loadMembers();
