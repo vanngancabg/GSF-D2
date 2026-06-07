@@ -1,5 +1,5 @@
-// ĐỔI ĐƯỜNG LINK DƯỚO ĐÂY THÀNH LINK WEB APP GOOGLE SHEETS CỦA BẠN (GIỮ NGUYÊN DẤU NGOẶC KÉP)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykEzSUm8bnmxp5ypKyJcvv7ugXHIXcWBmF-R4UmS5xg7Q-qi4atCvAn0DBRvCGuJ4s4Q/exec";
+// ĐỔI ĐƯỜNG LINK DƯỚI ĐÂY THÀNH LINK WEB APP GOOGLE SHEETS CỦA BẠN (GIỮ NGUYÊN DẤU NGOẶC KÉP)
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3ukMrZ0D17rGEXwxZ3f2jzMq_EEnj6goi_z_VrobigC-J4QZqwxpEL4HNDzSKkzQ/exec";
 
 const form = document.getElementById('memberForm');
 const tableBody = document.getElementById('memberTableBody');
@@ -8,33 +8,14 @@ const addAccountBtn = document.getElementById('addAccountBtn');
 const searchInput = document.getElementById('searchAccount');
 
 let allMembersData = []; 
-let isComposing = false; // Biến kiểm tra xem người dùng có đang gõ tổ hợp dấu Tiếng Việt hay không
 
 // ==========================================
-// 1. ÉP KIỂU NHẬP LIỆU (ĐÃ SỬA LỖI GÕ TIẾNG VIỆT)
+// 1. ÉP KIỂU VÀ CHUẨN HÓA DỮ LIỆU NHẬP LIỆU
 // ==========================================
 
 const fullNameInput = document.getElementById('fullName');
 
-// Khi bộ gõ bắt đầu ghép dấu (Unikey/EVKey kích hoạt)
-fullNameInput.addEventListener('compositionstart', () => {
-    isComposing = true;
-});
-
-// Khi bộ gõ hoàn thành việc ghép dấu chữ Tiếng Việt
-fullNameInput.addEventListener('compositionend', function() {
-    isComposing = false;
-    // Gõ xong dấu thì lọc bỏ ngay ký tự số/đặc biệt nếu có
-    this.value = this.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '');
-});
-
-fullNameInput.addEventListener('input', function() {
-    // Nếu đang trong quá trình gõ Telex ghép dấu, tạm thời bỏ qua không xóa ký tự để tránh lỗi bộ gõ
-    if (isComposing) return;
-    this.value = this.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '');
-});
-
-// Chốt chặn cuối: Khi người dùng nhấn chuột ra ngoài ô Họ Tên, chuẩn hóa xóa mọi ký tự lỗi thừa
+// Đối với Họ Tên: KHÔNG lọc khi đang gõ (để không lỗi Unikey). Chỉ tự động lọc sạch khi người dùng nhấn chuột ra ngoài ô nhập.
 fullNameInput.addEventListener('blur', function() {
     this.value = this.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '').trim();
 });
@@ -153,9 +134,18 @@ searchInput.addEventListener('input', function() {
 // ==========================================
 form.addEventListener('submit', function(event) {
     event.preventDefault();
+    
+    // Trước khi gửi, tiến hành quét sạch ký tự lạ ở ô Họ Tên một lần nữa để bảo đảm dữ liệu gửi lên Sheets luôn chuẩn
+    let finalCleanName = fullNameInput.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '').trim();
+    fullNameInput.value = finalCleanName;
+
     const birth = document.getElementById('birthYear').value;
     const zaloVal = document.getElementById('zalo').value;
     
+    if(finalCleanName === "") {
+        alert("Vui lòng nhập họ và tên hợp lệ (chỉ chứa ký tự chữ)!");
+        return;
+    }
     if(birth.length !== 4 || zaloVal.length !== 10) {
         alert("Vui lòng kiểm tra lại! Năm sinh phải đủ 4 số, Số Zalo phải đủ 10 số.");
         return;
@@ -172,7 +162,7 @@ form.addEventListener('submit', function(event) {
     });
 
     const newMember = {
-        fullName: document.getElementById('fullName').value.trim(),
+        fullName: finalCleanName,
         birthYear: birth,
         accounts: accountsList,
         zalo: zaloVal
