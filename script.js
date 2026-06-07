@@ -48,7 +48,8 @@ function loadMembers() {
 form.addEventListener('submit', function(event) {
     event.preventDefault();
     
-    const submitBtn = form.querySelector('.submit-btn');
+    // SỬA TẠI ĐÂY: Lấy trực tiếp thẻ button thuộc form thay vì tìm class .submit-btn
+    const submitBtn = form.querySelector('button[type="submit"]');
     submitBtn.innerText = 'Đang gửi...';
     submitBtn.disabled = true;
 
@@ -70,7 +71,7 @@ form.addEventListener('submit', function(event) {
     .then(() => {
         alert('Đăng ký thành công! Dữ liệu đã được gửi lên Google Sheets.');
         form.reset();
-        submitBtn.innerText = 'Thêm thành viên';
+        submitBtn.innerText = 'Đăng ký'; // Sửa lại chữ hiển thị ban đầu của nút
         submitBtn.disabled = false;
         // Đợi 2 giây rồi load lại bảng để Google kịp cập nhật dữ liệu mới
         setTimeout(loadMembers, 2000);
@@ -78,7 +79,7 @@ form.addEventListener('submit', function(event) {
     .catch(error => {
         console.error('Lỗi gửi dữ liệu:', error);
         alert('Có lỗi xảy ra khi đăng ký!');
-        submitBtn.innerText = 'Thêm thành viên';
+        submitBtn.innerText = 'Đăng ký';
         submitBtn.disabled = false;
     });
 });
