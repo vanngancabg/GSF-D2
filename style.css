@@ -145,10 +145,11 @@ table {
     margin-top: 10px;
 }
 
-th, td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #1f2937;
+th {
+    background: #1f3047;
+    color: #94a3b8;
+    font-size: 14px;
+    text-align: center !important; /* Ép buộc tất cả tiêu đề cột phải ở giữa */
 }
 
 th {
