@@ -1,5 +1,5 @@
 // ĐỔI ĐƯỜNG LINK DƯỚI ĐÂY THÀNH LINK WEB APP GOOGLE SHEETS CỦA BẠN (GIỮ NGUYÊN DẤU NGOẶC KÉP)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykEzSUm8bnmxp5ypKyJcvv7ugXHIXcWBmF-R4UmS5xg7Q-qi4atCvAn0DBRvCGuJ4s4Q/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3ukMrZ0D17rGEXwxZ3f2jzMq_EEnj6goi_z_VrobigC-J4QZqwxpEL4HNDzSKkzQ/exec";
 
 const form = document.getElementById('memberForm');
 const tableBody = document.getElementById('memberTableBody');
@@ -103,8 +103,8 @@ function loadMembers() {
         .then(response => response.json())
         .then(data => {
             allMembersData = data;
-            filteredMembersData = data; // Ban đầu dữ liệu lọc bằng dữ liệu gốc
-            currentPage = 1; // Reset về trang 1
+            filteredMembersData = data; 
+            currentPage = 1; 
             
             updateDashboardCounters(data);
             renderTable();
@@ -126,6 +126,11 @@ function updateDashboardCounters(data) {
     document.getElementById('pendingAccs').innerText = (total - approved);
 }
 
+// Hàm kiểm tra trạng thái phê duyệt (Phục vụ cho việc sắp xếp)
+function isMemberApproved(member) {
+    return (member.status === true || member.status === "TRUE" || member.status === "Rồi");
+}
+
 // Hàm hiển thị dữ liệu bảng kết hợp Phân Trang 20 dòng
 function renderTable() {
     tableBody.innerHTML = '';
@@ -136,16 +141,24 @@ function renderTable() {
         return;
     }
     
-    // Tính toán dòng bắt đầu và dòng kết thúc của trang hiện tại
+    // YÊU CẦU SẮP XẾP: Tiến hành sắp xếp dữ liệu lọc, đưa Chờ duyệt lên đầu, Đã duyệt xuống dưới
+    filteredMembersData.sort((a, b) => {
+        let aApproved = isMemberApproved(a);
+        let bApproved = isMemberApproved(b);
+        
+        if (!aApproved && bApproved) return -1; // a chưa duyệt, b đã duyệt -> đưa a lên đầu
+        if (aApproved && !bApproved) return 1;  // a đã duyệt, b chưa duyệt -> đẩy a xuống dưới
+        return 0; // Giữ nguyên vị trí nếu trạng thái giống nhau
+    });
+    
     const startIndex = (currentPage - 1) * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
     
-    // Cắt mảng lấy đúng tối đa 20 dòng để hiển thị
     const pageData = filteredMembersData.slice(startIndex, endIndex);
     
     pageData.forEach((member, index) => {
         const row = document.createElement('tr');
-        let isApproved = (member.status === true || member.status === "TRUE" || member.status === "Rồi");
+        let isApproved = isMemberApproved(member);
         let statusHtml = isApproved 
             ? '<span class="status-badge approved">✔ Đã duyệt</span>' 
             : '<span class="status-badge pending">⏳ Chờ duyệt</span>';
@@ -157,7 +170,6 @@ function renderTable() {
             zaloStr = '0' + zaloStr;
         }
 
-        // Số thứ tự thực tế = Vị trí bắt đầu của trang + Vị trí trong trang + 1
         const actualSTT = startIndex + index + 1;
 
         row.innerHTML = `
@@ -176,16 +188,13 @@ function renderTable() {
         tableBody.appendChild(row);
     });
 
-    // Tạo thanh điều hướng nút phân trang
     setupPaginationControls();
 }
 
-// Hàm render hệ thống nút Next / Previous và số trang
 function setupPaginationControls() {
     const totalPages = Math.ceil(filteredMembersData.length / rowsPerPage);
-    if (totalPages <= 1) return; // Nếu chỉ có 1 trang hoặc ít hơn 20 dòng thì không cần hiện nút
+    if (totalPages <= 1) return;
 
-    // 1. Nút TRƯỚC (Previous)
     const prevBtn = document.createElement('button');
     prevBtn.className = 'page-btn';
     prevBtn.innerText = '◀ Trước';
@@ -198,7 +207,6 @@ function setupPaginationControls() {
     });
     paginationContainer.appendChild(prevBtn);
 
-    // 2. Các nút số trang cụ thể
     for (let i = 1; i <= totalPages; i++) {
         const pageNumBtn = document.createElement('button');
         pageNumBtn.className = `page-btn ${currentPage === i ? 'active' : ''}`;
@@ -210,7 +218,6 @@ function setupPaginationControls() {
         paginationContainer.appendChild(pageNumBtn);
     }
 
-    // 3. Nút SAU (Next)
     const nextBtn = document.createElement('button');
     nextBtn.className = 'page-btn';
     nextBtn.innerText = 'Sau ▶';
@@ -230,17 +237,15 @@ window.copyToClipboard = function(text) {
     }).catch(err => console.error('Lỗi sao chép:', err));
 }
 
-// THANH LỌC TÌM KIẾM TOÀN BỘ DỮ LIỆU
 searchInput.addEventListener('input', function() {
     const query = this.value.toLowerCase().trim();
     
-    // Quét bộ lọc trên toàn bộ mảng dữ liệu gốc ban đầu
     filteredMembersData = allMembersData.filter(m => 
         String(m.accounts || '').toLowerCase().includes(query)
     );
     
-    currentPage = 1; // Gõ tìm kiếm thì luôn đẩy về trang đầu tiên
-    renderTable();   // Vẽ lại bảng theo tập dữ liệu đã lọc
+    currentPage = 1; 
+    renderTable();   
 });
 
 // ==========================================
@@ -264,26 +269,40 @@ form.addEventListener('submit', function(event) {
         return;
     }
 
-    const submitBtn = form.querySelector('.submit-main-btn');
-    submitBtn.innerText = 'Đang đồng bộ đăng ký...';
-    submitBtn.disabled = true;
-
+    // YÊU CẦU CHỐNG TRÙNG: Thu thập danh sách các Acc game nhập từ form và làm sạch chúng
     const accountFields = document.querySelectorAll('.account-field');
     const accountsList = [];
+    let hasDuplicate = false;
+    let duplicateName = "";
+
     accountFields.forEach(f => { 
         let cleanedAcc = cleanAccountText(f.value);
         f.value = cleanedAcc;
         if(cleanedAcc !== "") {
+            // Kiểm tra đối chiếu với danh sách allMembersData tải về từ Sheets
+            let isExist = allMembersData.some(m => String(m.accounts || '').toLowerCase() === cleanedAcc);
+            if (isExist) {
+                hasDuplicate = true;
+                duplicateName = f.value;
+            }
             accountsList.push(cleanedAcc); 
         }
     });
 
-    if(accountsList.length === 0) {
-        alert("Vui lòng nhập ít nhất một tên Acc game hợp lệ!");
-        submitBtn.innerText = 'Gửi Đăng Ký Tham Gia';
-        submitBtn.disabled = false;
+    // Nếu phát hiện trùng tên tài khoản game, báo lỗi lập tức và dừng gửi form
+    if (hasDuplicate) {
+        alert(`Lỗi đăng ký: Tài khoản game "${duplicateName}" đã tồn tại trong danh sách của nhóm! Vui lòng kiểm tra lại.`);
         return;
     }
+
+    if(accountsList.length === 0) {
+        alert("Vui lòng nhập ít nhất một tên Acc game hợp lệ!");
+        return;
+    }
+
+    const submitBtn = form.querySelector('.submit-main-btn');
+    submitBtn.innerText = 'Đang đồng bộ đăng ký...';
+    submitBtn.disabled = true;
 
     const newMember = {
         fullName: finalCleanName,
