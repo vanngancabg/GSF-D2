@@ -1,5 +1,5 @@
 // ĐỔI ĐƯỜNG LINK DƯỚI ĐÂY THÀNH LINK WEB APP GOOGLE SHEETS CỦA BẠN (GIỮ NGUYÊN DẤU NGOẶC KÉP)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykEzSUm8bnmxp5ypKyJcvv7ugXHIXcWBmF-R4UmS5xg7Q-qi4atCvAn0DBRvCGuJ4s4Q/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3ukMrZ0D17rGEXwxZ3f2jzMq_EEnj6goi_z_VrobigC-J4QZqwxpEL4HNDzSKkzQ/exec";
 
 const form = document.getElementById('memberForm');
 const tableBody = document.getElementById('memberTableBody');
@@ -33,44 +33,56 @@ document.getElementById('zalo').addEventListener('input', function() {
     this.value = val;
 });
 
-// [HÀM TIỆN ÍCH]: Chuyển chuỗi có dấu thành không dấu, viết thường, loại bỏ khoảng trắng và ký tự đặc biệt
-function cleanAccountText(text) {
-    let str = text;
-    // Chuyển chữ có dấu thành không dấu
-    str = str.replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, "a");
-    str = str.replace(/[èéẹẻẽêềếệểễ]/g, "e");
-    str = str.replace(/[ìíịỉĩ]/g, "i");
-    str = str.replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, "o");
-    str = str.replace(/[ùúụủũưừứựửữ]/g, "u");
-    str = str.replace(/[ỳýỵỷỹ]/g, "y");
-    str = str.replace(/đ/g, "d");
-    str = str.replace(/[ÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴ]/g, "a");
-    str = str.replace(/[ÈÉẸẺẼÊỀẾỆỂỄ]/g, "e");
-    str = str.replace(/[ÌÍỊỈĨ]/g, "i");
-    str = str.replace(/[ÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠ]/g, "o");
-    str = str.replace(/[ÙÚỤỦŨƯỪỨỰỬỮ]/g, "u");
-    str = str.replace(/[ỲÝỴỶỸ]/g, "y");
-    str = str.replace(/Đ/g, "d");
-    
-    // Ép về chữ thường
-    str = str.toLowerCase();
-    // Xóa khoảng trắng và ký tự đặc biệt, chỉ giữ lại chữ cái a-z và số 0-9
-    str = str.replace(/[^a-z0-9]/g, '');
-    // Cắt chuỗi lấy tối đa 15 ký tự
-    if (str.length > 15) {
-        str = str.slice(0, 15);
-    }
-    return str;
-}
-
-// Đối với các ô Acc game: KHÔNG lọc khi đang gõ (tránh lỗi nuốt chữ của UniKey), chỉ lọc sạch khi nhấn chuột ra ngoài ô nhập
+// [HÀM TIỆN ÍCH]: Chốt chặn tối cao cho Acc Game - Chỉ cho gõ chữ thường không dấu và số, tối đa đúng 15 ký tự
 function applyAccountFieldRestriction(inputField) {
-    inputField.addEventListener('blur', function() {
-        this.value = cleanAccountText(this.value);
+    // Thuộc tính chặn độ dài tối đa 15 ký tự trực tiếp từ trình duyệt
+    inputField.setAttribute("maxlength", "15");
+
+    // BƯỚC 1: Chặn ngay khi vừa nhấn phím xuống (Chặn đứng phím tạo dấu của UniKey)
+    inputField.addEventListener('keydown', function(e) {
+        // Cho phép các phím chức năng hoạt động (Xóa Backspace, Delete, Mũi tên, Tab...)
+        if (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Tab') {
+            return;
+        }
+
+        // Tạo danh sách các phím tạo dấu Telex tiếng Việt cần chặn đứng: 
+        // s, f, r, x, j (dấu), w (ư,ơ), a (nếu gõ thêm để thành â), e, o, d (thành đ)
+        const telexKeys = ['s', 'f', 'r', 'x', 'j', 'w'];
+        if (telexKeys.includes(e.key.toLowerCase())) {
+            // Kiểm tra xem ký tự trước đó có trùng để tạo dấu không (như aa, ee, oo, dd)
+            const lastChar = this.value.slice(-1).toLowerCase();
+            if ((e.key === 'a' && lastChar === 'a') || 
+                (e.key === 'e' && lastChar === 'e') || 
+                (e.key === 'o' && lastChar === 'o') || 
+                (e.key === 'd' && lastChar === 'd')) {
+                e.preventDefault(); // Chặn đứng không cho gõ phím lặp tạo dấu
+                return;
+            }
+            
+            // Chặn luôn các phím dấu đơn lẻ để UniKey không thể bỏ dấu vào chữ
+            e.preventDefault();
+            return;
+        }
+
+        // Chặn tất cả những gì không phải là chữ thường tiếng Anh (a-z) và số (0-9)
+        // Chặn luôn chữ viết HOA (A-Z) và Khoảng trắng (Space)
+        if (!/^[a-z0-9]$/.test(e.key)) {
+            e.preventDefault();
+        }
+    });
+
+    // BƯỚC 2: Phòng hờ trường hợp copy-paste hoặc bộ gõ đi đường vòng, ép quét sạch lần nữa
+    inputField.addEventListener('input', function() {
+        // Bẻ thẳng chữ hoa thành chữ thường, xóa sạch ký tự lạ và chữ có dấu
+        let val = this.value.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (val.length > 15) {
+            val = val.slice(0, 15);
+        }
+        this.value = val;
     });
 }
 
-// Áp dụng ngay cho ô nhập Acc game mặc định đầu tiên
+// Áp dụng ngay quy tắc tối cao cho ô nhập Acc game mặc định đầu tiên
 const firstAccountField = document.querySelector('.account-field');
 if (firstAccountField) {
     applyAccountFieldRestriction(firstAccountField);
@@ -182,7 +194,6 @@ searchInput.addEventListener('input', function() {
 form.addEventListener('submit', function(event) {
     event.preventDefault();
     
-    // Chuẩn hóa dọn dẹp sạch sẽ ô Họ Tên
     let finalCleanName = fullNameInput.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '').trim();
     fullNameInput.value = finalCleanName;
 
@@ -202,12 +213,10 @@ form.addEventListener('submit', function(event) {
     submitBtn.innerText = 'Đang đồng bộ đăng ký...';
     submitBtn.disabled = true;
 
-    // Tiến hành quét dọn và chuẩn hóa sạch sẽ Từng ô nhập Acc game ngay trước khi đóng gói gửi đi
     const accountFields = document.querySelectorAll('.account-field');
     const accountsList = [];
     accountFields.forEach(f => { 
-        let cleanedAcc = cleanAccountText(f.value);
-        f.value = cleanedAcc; // hiển thị lại chữ đã làm sạch trên form
+        let cleanedAcc = f.value.toLowerCase().replace(/[^a-z0-9]/g, '');
         if(cleanedAcc !== "") {
             accountsList.push(cleanedAcc); 
         }
