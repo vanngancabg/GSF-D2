@@ -68,7 +68,7 @@ addAccountBtn.addEventListener('click', function() {
 // 3. TẢI VÀ HIỂN THỊ DANH SÁCH + TÌM KIẾM (YÊU CẦU 3)
 // ==========================================
 function loadMembers() {
-    tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Đang tải danh sách từ Google Sheets...</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Đang tải danh sách ...</td></tr>';
     
     fetch(SCRIPT_URL)
         .then(response => response.json())
