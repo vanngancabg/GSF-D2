@@ -6,7 +6,7 @@ const tableBody = document.getElementById('memberTableBody');
 
 // Hàm tải dữ liệu từ Google Sheets về hiển thị lên bảng
 function loadMembers() {
-    tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Đang tải danh sách ...</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Đang tải danh sách từ Google Sheets...</td></tr>';
     
     fetch(SCRIPT_URL)
         .then(response => response.json())
