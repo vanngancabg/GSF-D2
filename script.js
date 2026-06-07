@@ -1,5 +1,5 @@
 // ĐỔI ĐƯỜNG LINK DƯỚI ĐÂY THÀNH LINK WEB APP GOOGLE SHEETS CỦA BẠN (GIỮ NGUYÊN DẤU NGOẶC KÉP)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykEzSUm8bnmxp5ypKyJcvv7ugXHIXcWBmF-R4UmS5xg7Q-qi4atCvAn0DBRvCGuJ4s4Q/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3ukMrZ0D17rGEXwxZ3f2jzMq_EEnj6goi_z_VrobigC-J4QZqwxpEL4HNDzSKkzQ/exec";
 
 const form = document.getElementById('memberForm');
 const tableBody = document.getElementById('memberTableBody');
@@ -33,7 +33,7 @@ document.getElementById('zalo').addEventListener('input', function() {
     this.value = val;
 });
 
-// [HÀM TIỆN ÍCH]: Làm sạch Acc game (Chuyển có dấu -> không dấu, chữ thường, xóa ký tự lạ, cắt tối đa 15 ký tự)
+// [HÀM TIỆN ÍCH]: Chuyển chuỗi có dấu thành không dấu, viết thường, loại bỏ khoảng trắng và ký tự đặc biệt
 function cleanAccountText(text) {
     let str = text;
     // Chuyển chữ có dấu thành không dấu
@@ -54,17 +54,27 @@ function cleanAccountText(text) {
     
     // Ép về chữ viết thường
     str = str.toLowerCase();
-    // Xóa khoảng trắng và ký tự đặc biệt, chỉ giữ lại chữ cái và số
+    // Xóa tất cả khoảng trắng, dấu cách và ký tự đặc biệt, chỉ giữ lại chữ cái và số
     str = str.replace(/[^a-z0-9]/g, '');
-    // Cắt chuỗi lấy tối đa đúng 15 ký tự theo quy ước
+    // Khống chế tối đa đúng 15 ký tự theo quy ước
     if (str.length > 15) {
         str = str.slice(0, 15);
     }
     return str;
 }
 
-// Đối với các ô Acc game: KHÔNG lọc khi đang gõ (tránh lỗi nuốt chữ). Chỉ làm sạch khi nhấn chuột ra ngoài hoặc lúc gửi form.
+// Đối với các ô Acc game: Áp dụng cơ chế dọn dẹp thời gian thực để chặn khoảng trắng và khóa cứng tối đa 15 chữ
 function applyAccountFieldRestriction(inputField) {
+    // Thuộc tính khóa cứng độ dài ô nhập của trình duyệt không cho vượt quá 15 chữ
+    inputField.setAttribute("maxlength", "15");
+
+    // Xóa dấu cách khoảng trắng NGAY LẬP TỨC khi gõ
+    inputField.addEventListener('input', function() {
+        // Xóa ngay lập tức mọi khoảng trắng trống để người dùng không gõ được phím Space
+        this.value = this.value.replace(/\s+/g, '');
+    });
+
+    // Khi người dùng bấm chuột ra ngoài ô, bẻ về chữ thường không dấu và lọc sạch hoàn chỉnh
     inputField.addEventListener('blur', function() {
         this.value = cleanAccountText(this.value);
     });
@@ -202,12 +212,12 @@ form.addEventListener('submit', function(event) {
     submitBtn.innerText = 'Đang đồng bộ đăng ký...';
     submitBtn.disabled = true;
 
-    // Tiến hành ép quy ước làm sạch (Bỏ dấu, bẻ chữ thường, xóa khoảng trắng, cắt 15 ký tự) cho mọi ô Acc game ngay trước khi gửi gửi đi
+    // Quét dọn, làm sạch không dấu, bẻ chữ thường và cắt đúng tối đa 15 ký tự trước khi nạp data gửi đi
     const accountFields = document.querySelectorAll('.account-field');
     const accountsList = [];
     accountFields.forEach(f => { 
         let cleanedAcc = cleanAccountText(f.value);
-        f.value = cleanedAcc; // Điền lại chữ sạch hiển thị lên màn hình form
+        f.value = cleanedAcc; // Cập nhật chữ sạch hiển thị lên màn hình form
         if(cleanedAcc !== "") {
             accountsList.push(cleanedAcc); 
         }
