@@ -1,77 +1,87 @@
+// ĐỔI LINK NÀY THÀNH LINK WEB APP APPS SCRIPT CỦA BẠN
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3ukMrZ0D17rGEXwxZ3f2jzMq_EEnj6goi_z_VrobigC-J4QZqwxpEL4HNDzSKkzQ/exec";
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHFgnQove8fa7M-nSzpLE6txVSakREdlcsYgrvEG-xjzR9Rw2JPaFLRju0laHUR9qOXQ/exec";
+const form = document.getElementById('memberForm');
+const tableBody = document.getElementById('memberTableBody');
 
-const form = document.getElementById("memberForm");
-const tableBody = document.getElementById("memberTableBody");
+// Hàm tải dữ liệu từ Google Sheets về hiển thị lên bảng
+function loadMembers() {
+    tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Đang tải danh sách từ Google Sheets...</td></tr>';
+    
+    fetch(SCRIPT_URL)
+        .then(response => response.json())
+        .then(data => {
+            tableBody.innerHTML = '';
+            if(data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Chưa có thành viên nào.</td></tr>';
+                return;
+            }
+            
+            data.forEach(member => {
+                const row = document.createElement('tr');
+                
+                // Kiểm tra trạng thái cột E từ Google Sheets để hiển thị đẹp hơn
+                let statusHtml = '';
+                if (member.status === true || member.status === "TRUE" || member.status === "Rồi") {
+                    statusHtml = '<span style="color: #10b981; font-weight: bold;">✔ Đã duyệt</span>';
+                } else {
+                    statusHtml = '<span style="color: #ef4444;">❌ Chưa</span>';
+                }
 
-async function loadMembers(){
-
-tableBody.innerHTML = "<tr><td colspan='4'>Đang tải dữ liệu...</td></tr>";
-
-try{
-
-const response = await fetch(SCRIPT_URL);
-const data = await response.json();
-
-tableBody.innerHTML = "";
-
-data.reverse().forEach(member => {
-
-const row = document.createElement("tr");
-
-row.innerHTML = `
-<td>${member.fullName}</td>
-<td>${member.birthYear}</td>
-<td>${member.accounts}</td>
-<td>
-<a class="zalo-link" href="https://zalo.me/${member.zalo}" target="_blank">
-${member.zalo}
-</a>
-</td>
-`;
-
-tableBody.appendChild(row);
-
-});
-
-}catch(error){
-
-tableBody.innerHTML = "<tr><td colspan='4'>Không tải được dữ liệu.</td></tr>";
-
+                row.innerHTML = `
+                    <td>${member.fullName || ''}</td>
+                    <td>${member.birthYear || ''}</td>
+                    <td>${member.accounts || ''}</td>
+                    <td><a class='zalo-link' href='https://zalo.me/${member.zalo}' target='_blank'>${member.zalo || ''}</a></td>
+                    <td style="text-align:center;">${statusHtml}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(error => {
+            console.error('Lỗi:', error);
+            tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Không thể tải dữ liệu!</td></tr>';
+        });
 }
 
-}
+// Xử lý sự kiện khi bấm nút "Thêm thành viên" gửi lên Google Sheets
+form.addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    const submitBtn = form.querySelector('.submit-btn');
+    submitBtn.innerText = 'Đang gửi...';
+    submitBtn.disabled = true;
 
-form.addEventListener("submit", async function(event){
+    const newMember = {
+        fullName: document.getElementById('fullName').value,
+        birthYear: document.getElementById('birthYear').value,
+        accounts: document.getElementById('accounts').value,
+        zalo: document.getElementById('zalo').value
+    };
 
-event.preventDefault();
-
-const memberData = {
-fullName: document.getElementById("fullName").value,
-birthYear: document.getElementById("birthYear").value,
-accounts: document.getElementById("accounts").value,
-zalo: String(document.getElementById("zalo").value)
-};
-
-try{
-
-await fetch(SCRIPT_URL, {
-method:"POST",
-body: JSON.stringify(memberData)
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Sử dụng chế độ này để tránh lỗi bảo mật CORS khi gọi qua App Script
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newMember)
+    })
+    .then(() => {
+        alert('Đăng ký thành công! Dữ liệu đã được gửi lên Google Sheets.');
+        form.reset();
+        submitBtn.innerText = 'Thêm thành viên';
+        submitBtn.disabled = false;
+        // Đợi 2 giây rồi load lại bảng để Google kịp cập nhật dữ liệu mới
+        setTimeout(loadMembers, 2000);
+    })
+    .catch(error => {
+        console.error('Lỗi gửi dữ liệu:', error);
+        alert('Có lỗi xảy ra khi đăng ký!');
+        submitBtn.innerText = 'Thêm thành viên';
+        submitBtn.disabled = false;
+    });
 });
 
-alert("Đăng ký thành công");
-
-form.reset();
-
-loadMembers();
-
-}catch(error){
-
-alert("Không gửi được dữ liệu");
-
-}
-
-});
-
+// Chạy hàm tải danh sách ngay khi trang web vừa mở
 loadMembers();
