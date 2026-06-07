@@ -18,8 +18,6 @@ const rowsPerPage = 20; // Giới hạn đúng 20 dòng mỗi trang
 // ==========================================
 
 const fullNameInput = document.getElementById('fullName');
-
-// ĐÃ SỬA TẬN GỐC: Xóa bỏ hoàn toàn lệnh ".replace" tự động khi blur để UniKey/EVKey không bao giờ bị nuốt dấu Tiếng Việt
 fullNameInput.addEventListener('blur', function() {
     this.value = this.value.trim(); // Chỉ cắt bỏ khoảng trắng thừa ở đầu/cuối, giữ nguyên 100% chữ có dấu
 });
@@ -36,25 +34,12 @@ document.getElementById('zalo').addEventListener('input', function() {
     this.value = val;
 });
 
+// ĐÃ SỬA: Hàm lọc chỉ loại bỏ khoảng trắng và giữ độ dài 15 ký tự (chấp nhận mọi ký tự đặc biệt)
 function cleanAccountText(text) {
     let str = text;
-    str = str.replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, "a");
-    str = str.replace(/[èéẹẻẽêềếệểễ]/g, "e");
-    str = str.replace(/[ìíịỉĩ]/g, "i");
-    str = str.replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, "o");
-    str = str.replace(/[ùúụủũưừứựửữ]/g, "u");
-    str = str.replace(/[ỳýỵỷỹ]/g, "y");
-    str = str.replace(/đ/g, "d");
-    str = str.replace(/[ÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴ]/g, "a");
-    str = str.replace(/[ÈÉẸẺẼÊỀẾỆỂỄ]/g, "e");
-    str = str.replace(/[ÌÍỊỈĨ]/g, "i");
-    str = str.replace(/[ÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠ]/g, "o");
-    str = str.replace(/[ÙÚỤỦŨƯỪỨỰỬỮ]/g, "u");
-    str = str.replace(/[ỲÝỴỶỸ]/g, "y");
-    str = str.replace(/Đ/g, "d");
-    
-    str = str.toLowerCase();
-    str = str.replace(/[^a-z0-9]/g, '');
+    // Xóa tất cả các khoảng trắng, dấu cách thụt lề
+    str = str.replace(/\s+/g, '');
+    // Cắt chuỗi lấy tối đa đúng 15 ký tự theo quy ước
     if (str.length > 15) {
         str = str.slice(0, 15);
     }
@@ -62,10 +47,15 @@ function cleanAccountText(text) {
 }
 
 function applyAccountFieldRestriction(inputField) {
+    // Khóa cứng trình duyệt không cho nhập quá 15 ký tự
     inputField.setAttribute("maxlength", "15");
+    
+    // Xóa dấu cách khoảng trắng NGAY LẬP TỨC khi gõ mà không chặn ký tự đặc biệt hay gây nuốt chữ
     inputField.addEventListener('input', function() {
         this.value = this.value.replace(/\s+/g, '');
     });
+    
+    // Khi rời chuột khỏi ô nhập, tiến hành kiểm tra lại một lần nữa
     inputField.addEventListener('blur', function() {
         this.value = cleanAccountText(this.value);
     });
@@ -252,7 +242,6 @@ form.addEventListener('submit', function(event) {
     
     let rawName = fullNameInput.value.trim();
 
-    // Kiểm tra tính hợp lệ bằng cảnh báo: Nếu chứa số hoặc ký tự đặc biệt thì chặn lại báo lỗi
     if (/[0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(rawName)) {
         alert("Lỗi: Họ và tên không được chứa số hoặc ký tự đặc biệt!");
         return;
@@ -279,7 +268,8 @@ form.addEventListener('submit', function(event) {
         let cleanedAcc = cleanAccountText(f.value);
         f.value = cleanedAcc;
         if(cleanedAcc !== "") {
-            let isExist = allMembersData.some(m => String(m.accounts || '').toLowerCase() === cleanedAcc);
+            // Kiểm tra trùng tài khoản (không phân biệt hoa thường)
+            let isExist = allMembersData.some(m => String(m.accounts || '').toLowerCase() === cleanedAcc.toLowerCase());
             if (isExist) {
                 hasDuplicate = true;
                 duplicateName = f.value;
