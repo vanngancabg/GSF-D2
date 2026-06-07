@@ -1,4 +1,4 @@
-// ĐỔI ĐƯỜNG LINK DƯỚI ĐÂY THÀNH LINK WEB APP GOOGLE SHEETS CỦA BẠN (GIỮ NGUYÊN DẤU NGOẶC KÉP)
+// ĐỔI ĐƯỜNG LINK DƯỚO ĐÂY THÀNH LINK WEB APP GOOGLE SHEETS CỦA BẠN (GIỮ NGUYÊN DẤU NGOẶC KÉP)
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykEzSUm8bnmxp5ypKyJcvv7ugXHIXcWBmF-R4UmS5xg7Q-qi4atCvAn0DBRvCGuJ4s4Q/exec";
 
 const form = document.getElementById('memberForm');
@@ -8,19 +8,44 @@ const addAccountBtn = document.getElementById('addAccountBtn');
 const searchInput = document.getElementById('searchAccount');
 
 let allMembersData = []; 
+let isComposing = false; // Biến kiểm tra xem người dùng có đang gõ tổ hợp dấu Tiếng Việt hay không
 
 // ==========================================
-// 1. ÉP KIỂU NHẬP LIỆU NGAY KHI GÕ CHẶN KÝ TỰ LỖI
+// 1. ÉP KIỂU NHẬP LIỆU (ĐÃ SỬA LỖI GÕ TIẾNG VIỆT)
 // ==========================================
-document.getElementById('fullName').addEventListener('input', function() {
+
+const fullNameInput = document.getElementById('fullName');
+
+// Khi bộ gõ bắt đầu ghép dấu (Unikey/EVKey kích hoạt)
+fullNameInput.addEventListener('compositionstart', () => {
+    isComposing = true;
+});
+
+// Khi bộ gõ hoàn thành việc ghép dấu chữ Tiếng Việt
+fullNameInput.addEventListener('compositionend', function() {
+    isComposing = false;
+    // Gõ xong dấu thì lọc bỏ ngay ký tự số/đặc biệt nếu có
     this.value = this.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '');
 });
 
+fullNameInput.addEventListener('input', function() {
+    // Nếu đang trong quá trình gõ Telex ghép dấu, tạm thời bỏ qua không xóa ký tự để tránh lỗi bộ gõ
+    if (isComposing) return;
+    this.value = this.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '');
+});
+
+// Chốt chặn cuối: Khi người dùng nhấn chuột ra ngoài ô Họ Tên, chuẩn hóa xóa mọi ký tự lỗi thừa
+fullNameInput.addEventListener('blur', function() {
+    this.value = this.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '').trim();
+});
+
+// [Năm sinh]: Chỉ được gõ số, tối đa 4 ký tự
 document.getElementById('birthYear').addEventListener('input', function() {
     this.value = this.value.replace(/[^0-9]/g, '');
     if (this.value.length > 4) this.value = this.value.slice(0, 4);
 });
 
+// [Số điện thoại Zalo]: Chỉ số, tối đa 10 ký tự, bắt đầu bằng số 0
 document.getElementById('zalo').addEventListener('input', function() {
     let val = this.value.replace(/[^0-9]/g, '');
     if (val.length > 0 && val[0] !== '0') val = '';
@@ -65,13 +90,9 @@ function loadMembers() {
 function updateDashboardCounters(data) {
     let total = data.length;
     let approved = 0;
-    
     data.forEach(m => {
-        if (m.status === true || m.status === "TRUE" || m.status === "Rồi") {
-            approved++;
-        }
+        if (m.status === true || m.status === "TRUE" || m.status === "Rồi") approved++;
     });
-    
     document.getElementById('totalAccs').innerText = total;
     document.getElementById('approvedAccs').innerText = approved;
     document.getElementById('pendingAccs').innerText = (total - approved);
@@ -86,7 +107,6 @@ function renderTable(dataList) {
     
     dataList.forEach((member, index) => {
         const row = document.createElement('tr');
-        
         let isApproved = (member.status === true || member.status === "TRUE" || member.status === "Rồi");
         let statusHtml = isApproved 
             ? '<span class="status-badge approved">✔ Đã duyệt</span>' 
@@ -116,14 +136,12 @@ function renderTable(dataList) {
     });
 }
 
-// Tính năng click copy nhanh tên Acc game
 window.copyToClipboard = function(text) {
     navigator.clipboard.writeText(text).then(() => {
         alert(`Đã copy tài khoản: ${text}`);
     }).catch(err => console.error('Lỗi sao chép:', err));
 }
 
-// THANH LỌC TÌM KIẾM
 searchInput.addEventListener('input', function() {
     const query = this.value.toLowerCase().trim();
     const filtered = allMembersData.filter(m => String(m.accounts || '').toLowerCase().includes(query));
@@ -174,7 +192,7 @@ form.addEventListener('submit', function(event) {
         });
         submitBtn.innerText = 'Gửi Đăng Ký Tham Gia';
         submitBtn.disabled = false;
-        setTimeout(loadMembers, 2500); // Reload bảng sau 2.5s để Google kịp đồng bộ
+        setTimeout(loadMembers, 2500);
     })
     .catch(error => {
         console.error('Lỗi gửi form:', error);
@@ -184,5 +202,4 @@ form.addEventListener('submit', function(event) {
     });
 });
 
-// Chạy tải danh sách lần đầu khi mở trang web
 loadMembers();
