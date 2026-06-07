@@ -6,26 +6,27 @@ const tableBody = document.getElementById('memberTableBody');
 const accountContainer = document.getElementById('accountInputContainer');
 const addAccountBtn = document.getElementById('addAccountBtn');
 const searchInput = document.getElementById('searchAccount');
+const paginationContainer = document.getElementById('pagination');
 
 let allMembersData = []; 
+let filteredMembersData = []; // Lưu trữ dữ liệu sau khi lọc tìm kiếm
+let currentPage = 1;
+const rowsPerPage = 20; // Giới hạn đúng 20 dòng mỗi trang
 
 // ==========================================
 // 1. ÉP KIỂU VÀ CHUẨN HÓA DỮ LIỆU NHẬP LIỆU
 // ==========================================
 
-// [Họ và Tên]: Cho phép gõ tự do, tự động lọc sạch số/ký tự đặc biệt khi rời ô nhập.
 const fullNameInput = document.getElementById('fullName');
 fullNameInput.addEventListener('blur', function() {
     this.value = this.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '').trim();
 });
 
-// [Năm sinh]: Chỉ được gõ số, tối đa 4 ký tự
 document.getElementById('birthYear').addEventListener('input', function() {
     this.value = this.value.replace(/[^0-9]/g, '');
     if (this.value.length > 4) this.value = this.value.slice(0, 4);
 });
 
-// [Số điện thoại Zalo]: Chỉ gõ số, tối đa 10 ký tự, bắt đầu bằng số 0
 document.getElementById('zalo').addEventListener('input', function() {
     let val = this.value.replace(/[^0-9]/g, '');
     if (val.length > 0 && val[0] !== '0') val = '';
@@ -33,10 +34,8 @@ document.getElementById('zalo').addEventListener('input', function() {
     this.value = val;
 });
 
-// [HÀM TIỆN ÍCH]: Chuyển chuỗi có dấu thành không dấu, viết thường, loại bỏ khoảng trắng và ký tự đặc biệt
 function cleanAccountText(text) {
     let str = text;
-    // Chuyển chữ có dấu thành không dấu
     str = str.replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, "a");
     str = str.replace(/[èéẹẻẽêềếệểễ]/g, "e");
     str = str.replace(/[ìíịỉĩ]/g, "i");
@@ -52,40 +51,28 @@ function cleanAccountText(text) {
     str = str.replace(/[ỲÝỴỶỸ]/g, "y");
     str = str.replace(/Đ/g, "d");
     
-    // Ép về chữ viết thường
     str = str.toLowerCase();
-    // Xóa tất cả khoảng trắng, dấu cách và ký tự đặc biệt, chỉ giữ lại chữ cái và số
     str = str.replace(/[^a-z0-9]/g, '');
-    // Khống chế tối đa đúng 15 ký tự theo quy ước
     if (str.length > 15) {
         str = str.slice(0, 15);
     }
     return str;
 }
 
-// Đối với các ô Acc game: Áp dụng cơ chế dọn dẹp thời gian thực để chặn khoảng trắng và khóa cứng tối đa 15 chữ
 function applyAccountFieldRestriction(inputField) {
-    // Thuộc tính khóa cứng độ dài ô nhập của trình duyệt không cho vượt quá 15 chữ
     inputField.setAttribute("maxlength", "15");
-
-    // Xóa dấu cách khoảng trắng NGAY LẬP TỨC khi gõ
     inputField.addEventListener('input', function() {
-        // Xóa ngay lập tức mọi khoảng trắng trống để người dùng không gõ được phím Space
         this.value = this.value.replace(/\s+/g, '');
     });
-
-    // Khi người dùng bấm chuột ra ngoài ô, bẻ về chữ thường không dấu và lọc sạch hoàn chỉnh
     inputField.addEventListener('blur', function() {
         this.value = cleanAccountText(this.value);
     });
 }
 
-// Áp dụng ngay cho ô nhập Acc game mặc định đầu tiên
 const firstAccountField = document.querySelector('.account-field');
 if (firstAccountField) {
     applyAccountFieldRestriction(firstAccountField);
 }
-
 
 // ==========================================
 // 2. THÊM / XÓA Ô NHẬP LIỆU ACC GAME
@@ -109,15 +96,18 @@ addAccountBtn.addEventListener('click', function() {
 });
 
 // ==========================================
-// 3. TẢI VÀ ĐỒNG BỘ DỮ LIỆU THỐNG KÊ
+// 3. TẢI, PHÂN TRANG VÀ ĐỒNG BỘ THỐNG KÊ
 // ==========================================
 function loadMembers() {
     fetch(SCRIPT_URL)
         .then(response => response.json())
         .then(data => {
             allMembersData = data;
+            filteredMembersData = data; // Ban đầu dữ liệu lọc bằng dữ liệu gốc
+            currentPage = 1; // Reset về trang 1
+            
             updateDashboardCounters(data);
-            renderTable(data);
+            renderTable();
         })
         .catch(error => {
             console.error('Lỗi tải dữ liệu:', error);
@@ -136,14 +126,24 @@ function updateDashboardCounters(data) {
     document.getElementById('pendingAccs').innerText = (total - approved);
 }
 
-function renderTable(dataList) {
+// Hàm hiển thị dữ liệu bảng kết hợp Phân Trang 20 dòng
+function renderTable() {
     tableBody.innerHTML = '';
-    if(dataList.length === 0) {
+    paginationContainer.innerHTML = '';
+    
+    if(filteredMembersData.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: #64748b;">Không tìm thấy kết quả phù hợp.</td></tr>';
         return;
     }
     
-    dataList.forEach((member, index) => {
+    // Tính toán dòng bắt đầu và dòng kết thúc của trang hiện tại
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    
+    // Cắt mảng lấy đúng tối đa 20 dòng để hiển thị
+    const pageData = filteredMembersData.slice(startIndex, endIndex);
+    
+    pageData.forEach((member, index) => {
         const row = document.createElement('tr');
         let isApproved = (member.status === true || member.status === "TRUE" || member.status === "Rồi");
         let statusHtml = isApproved 
@@ -157,8 +157,11 @@ function renderTable(dataList) {
             zaloStr = '0' + zaloStr;
         }
 
+        // Số thứ tự thực tế = Vị trí bắt đầu của trang + Vị trí trong trang + 1
+        const actualSTT = startIndex + index + 1;
+
         row.innerHTML = `
-            <td style="color: #64748b; font-weight: 500;">${index + 1}</td>
+            <td style="color: #64748b; font-weight: 500;">${actualSTT}</td>
             <td style="font-weight: 500;">${member.fullName || ''}</td>
             <td>${member.birthYear || ''}</td>
             <td>
@@ -172,6 +175,53 @@ function renderTable(dataList) {
         `;
         tableBody.appendChild(row);
     });
+
+    // Tạo thanh điều hướng nút phân trang
+    setupPaginationControls();
+}
+
+// Hàm render hệ thống nút Next / Previous và số trang
+function setupPaginationControls() {
+    const totalPages = Math.ceil(filteredMembersData.length / rowsPerPage);
+    if (totalPages <= 1) return; // Nếu chỉ có 1 trang hoặc ít hơn 20 dòng thì không cần hiện nút
+
+    // 1. Nút TRƯỚC (Previous)
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'page-btn';
+    prevBtn.innerText = '◀ Trước';
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+        }
+    });
+    paginationContainer.appendChild(prevBtn);
+
+    // 2. Các nút số trang cụ thể
+    for (let i = 1; i <= totalPages; i++) {
+        const pageNumBtn = document.createElement('button');
+        pageNumBtn.className = `page-btn ${currentPage === i ? 'active' : ''}`;
+        pageNumBtn.innerText = i;
+        pageNumBtn.addEventListener('click', () => {
+            currentPage = i;
+            renderTable();
+        });
+        paginationContainer.appendChild(pageNumBtn);
+    }
+
+    // 3. Nút SAU (Next)
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'page-btn';
+    nextBtn.innerText = 'Sau ▶';
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable();
+        }
+    });
+    paginationContainer.appendChild(nextBtn);
 }
 
 window.copyToClipboard = function(text) {
@@ -180,10 +230,17 @@ window.copyToClipboard = function(text) {
     }).catch(err => console.error('Lỗi sao chép:', err));
 }
 
+// THANH LỌC TÌM KIẾM TOÀN BỘ DỮ LIỆU
 searchInput.addEventListener('input', function() {
     const query = this.value.toLowerCase().trim();
-    const filtered = allMembersData.filter(m => String(m.accounts || '').toLowerCase().includes(query));
-    renderTable(filtered);
+    
+    // Quét bộ lọc trên toàn bộ mảng dữ liệu gốc ban đầu
+    filteredMembersData = allMembersData.filter(m => 
+        String(m.accounts || '').toLowerCase().includes(query)
+    );
+    
+    currentPage = 1; // Gõ tìm kiếm thì luôn đẩy về trang đầu tiên
+    renderTable();   // Vẽ lại bảng theo tập dữ liệu đã lọc
 });
 
 // ==========================================
@@ -192,7 +249,6 @@ searchInput.addEventListener('input', function() {
 form.addEventListener('submit', function(event) {
     event.preventDefault();
     
-    // Chuẩn hóa dọn dẹp sạch sẽ ô Họ Tên trước khi gửi
     let finalCleanName = fullNameInput.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠỢ̣̣̣̣̣́́̉̃́̉̃́̀̉̃́̀́̉̃́̀́̉̃́̉̃́ Gg]/g, '').trim();
     fullNameInput.value = finalCleanName;
 
@@ -212,12 +268,11 @@ form.addEventListener('submit', function(event) {
     submitBtn.innerText = 'Đang đồng bộ đăng ký...';
     submitBtn.disabled = true;
 
-    // Quét dọn, làm sạch không dấu, bẻ chữ thường và cắt đúng tối đa 15 ký tự trước khi nạp data gửi đi
     const accountFields = document.querySelectorAll('.account-field');
     const accountsList = [];
     accountFields.forEach(f => { 
         let cleanedAcc = cleanAccountText(f.value);
-        f.value = cleanedAcc; // Cập nhật chữ sạch hiển thị lên màn hình form
+        f.value = cleanedAcc;
         if(cleanedAcc !== "") {
             accountsList.push(cleanedAcc); 
         }
