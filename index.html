@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GSF Group -Vnn | Median XL Việt Nam</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,50 +17,78 @@
         
         <div class="gsf-info-box" style="margin: 20px auto; max-width: 800px; text-align: left; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.15); font-size: 14px; line-height: 1.6;">
             <p style="margin-top: 0; color: #fff; font-weight: 600; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">🎮 Chế độ chơi GSF là gì?</p>
-            <p style="margin-bottom: 8px;"><strong style="color: var(--accent-gold);">Group Self Found (GSF)</strong> là chế độ chơi mà các thành viên trong nhóm chỉ được phép sử dụng các vật phẩm do chính mình hoặc các thành viên khác trong nhóm tự cày cuốc rơi ra. <span style="color: #ef4444; font-weight: 600;">TUYỆT ĐỐI KHÔNG</span> giao dịch, mua bán, xin xỏ hay nhận hỗ trợ từ bất kỳ người chơi nào nằm ngoài danh sách Group.</p>
-            <p style="margin-bottom: 0;">Mục đích nhằm tạo ra một môi trường trải nghiệm game nguyên bản, gia tăng sự gắn kết giữa anh em cày cuốc và giữ nguyên giá trị nguyên thủy của từng vật phẩm tìm được.</p>
-            
-            <p style="margin-top: 20px; color: #fff; font-weight: 600; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">📝 Quy trình tham gia nhóm:</p>
-            <ol style="margin: 8px 0 0 0; padding-left: 20px; color: var(--text-primary);">
-                <li style="margin-bottom: 6px;">Điền chính xác thông tin cá nhân và danh sách tài khoản game (Acc) vào Form đăng ký bên dưới.</li>
-                <li style="margin-bottom: 6px;">Sau khi bấm gửi, hãy chủ động tham gia vào <a href="https://zalo.me/g/your-zalo-group-link" target="_blank" style="color: var(--accent-gold); font-weight: 600; text-decoration: underline;">Nhóm Zalo hỗ trợ</a> để báo danh với Ban Quản Trị.</li>
-                <li style="margin-bottom: 0;">Hệ thống sẽ kiểm duyệt thông tin công khai. Thành viên có thể theo dõi tiến độ duyệt trực tiếp trên <a href="https://script.google.com/macros/s/AKfycbykEzSUm8bnmxp5ypKyJcvv7ugXHIXcWBmF-R4UmS5xg7Q-qi4atCvAn0DBRvCGuJ4s4Q/exec" target="_blank" style="color: var(--accent-gold); font-weight: 600; text-decoration: underline;">Trang quản lý Group</a> hoặc tại bảng danh sách hiển thị thời gian thực bên dưới.</li>
-            </ol>
+            <p style="color: var(--text-muted); margin: 8px 0;">Là chế độ chơi <strong>Online</strong> nội bộ dành riêng cho một nhóm người cùng chí hướng.</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 12px;">
+                <div>
+                    <strong style="color: var(--danger);">🛑 Khó khăn:</strong>
+                    <p style="color: var(--text-muted); margin: 4px 0 0 0;">Tự làm khó bản thân, nói không với việc mua bán thương mại bên ngoài.</p>
+                </div>
+                <div>
+                    <strong style="color: var(--success);">🔥 Thuận lợi:</strong>
+                    <p style="color: var(--text-muted); margin: 4px 0 0 0;">Đồ có thể đi xin anh em trong nhóm; dễ dàng tìm kiếm, lọc xem món đồ mình cần ai đang giữ để sang "xin" 🤝</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="links">
+            <a href="https://discord.gg/x46ED3UqPU" target="_blank" class="btn-discord">💬 Discord</a>
+            <a href="https://zalo.me/g/d36guyrwhqdrrauytv4x" target="_blank" class="btn-zalo">📱 Nhóm Zalo</a>
+            <a href="https://median-xl.com/gsf/gsf_manage.php" target="_blank" class="btn-manage">📦 Quản lý Group và tìm kiếm đồ</a>
         </div>
     </header>
 
-    <div class="grid-layout">
+    <section class="dashboard-stats">
+        <div class="stat-card">
+            <span class="stat-label">Tổng số tài khoản</span>
+            <span class="stat-value" id="totalAccs">0</span>
+        </div>
+        <div class="stat-card approved">
+            <span class="stat-label">Đã duyệt tham gia</span>
+            <span class="stat-value" id="approvedAccs">0</span>
+        </div>
+        <div class="stat-card pending">
+            <span class="stat-label">Đang chờ xử lý</span>
+            <span class="stat-value" id="pendingAccs">0</span>
+        </div>
+    </section>
+
+    <div class="main-layout">
         <div class="sidebar-area">
+            <section class="card guide-card">
+                <h2>📖 Quy trình tham gia</h2>
+                <ul class="steps-list">
+                    <li><span class="step-num">1</span> Điền thông tin chính xác vào form bên dưới, ấn đăng ký. Truy cập nhóm Zalo ở bên trên và tag chủ hoặc phó nhóm biết có người đăng ký.</li>
+                    <li><span class="step-num">2</span> Chờ Người quản lý gửi lời mời tham gia nhóm.</li>
+                    <li><span class="step-num">3</span> Đăng nhập từng Acc game vào link quản lý Group bên trên, chấp nhận lời mời vào nhóm.</li>
+                    <li><span class="step-num">4</span> Tạo nhân vật bắt buộc có đuôi tên <strong style="color: #f59e0b;">-Vnn</strong>.</li>
+                </ul>
+            </section>
+
             <section class="card form-card">
-                <div class="form-header">
-                    <h2>📋 Đăng Ký Thành Viên</h2>
-                    <p>Mỗi cá nhân chỉ đăng ký duy nhất 1 lần</p>
-                </div>
-
+                <h2>📝 Form Đăng Ký</h2>
                 <form id="memberForm">
-                    <div class="form-group">
-                        <label for="fullName">Họ và Tên <span class="req">*</span></label>
-                        <input type="text" id="fullName" placeholder="Nhập họ và tên có dấu..." required autocomplete="off">
+                    <div class="input-group">
+                        <label for="fullName">Họ và tên</label>
+                        <input type="text" id="fullName" placeholder="Nhập họ và tên của bạn" required autocomplete="off">
                     </div>
 
-                    <div class="form-group">
-                        <label for="birthYear">Năm Sinh <span class="req">*</span></label>
-                        <input type="text" id="birthYear" maxlength="4" placeholder="Ví dụ: 1995" required autocomplete="off">
+                    <div class="input-group">
+                        <label for="birthYear">Năm sinh</label>
+                        <input type="text" id="birthYear" placeholder="Ví dụ: 1998 (đúng 4 số)" required autocomplete="off">
                     </div>
 
-                    <div class="form-group">
-                        <label>Danh Sách Tài Khoản Game (Acc) <span class="req">*</span></label>
+                    <div class="input-group">
+                        <label>Tên Acc game</label>
                         <div id="accountInputContainer">
-                            <div class="account-input-wrapper animated fadeIn">
-                                <input type="text" class="account-input" placeholder="Nhập tên Acc game..." required autocomplete="off">
-                                <button type="button" class="remove-acc-btn" style="display:none;">✕</button>
+                            <div class="account-input-wrapper">
+                                <input type="text" class="account-field" placeholder="Nhập tên tài khoản game" required autocomplete="off">
+                                <button type="button" id="addAccountBtn" class="add-acc-btn">+</button>
                             </div>
                         </div>
-                        <button type="button" id="addAccountBtn" class="btn-secondary-action">+ Thêm tài khoản game khác</button>
                     </div>
 
-                    <div class="form-group">
-                        <label for="zalo">Số Điện Thoại Zalo <span class="req">*</span></label>
+                    <div class="input-group">
+                        <label for="zalo">Số điện thoại Zalo</label>
                         <input type="text" id="zalo" placeholder="Số điện thoại bắt đầu bằng số 0" required autocomplete="off">
                     </div>
 
@@ -81,7 +109,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style=\"width: 60px;\">STT</th>
+                            <th style="width: 60px;">STT</th>
                             <th>Họ và tên</th>
                             <th>Năm sinh</th>
                             <th>Tên Acc Game</th>
