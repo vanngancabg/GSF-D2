@@ -90,6 +90,25 @@ h1 { font-size: 46px; font-weight: 800; margin: 0 0 10px 0; }
     padding: 0;
     margin: 15px 0 0 0;
 }
+/* Màu sắc mặc định cho các link trong Quy trình tham gia */
+.steps-list .step-link {
+    color: #38bdf8; /* Màu xanh neon sáng, rất hợp với giao diện tối */
+    text-decoration: none; /* Mặc định xóa gạch chân để nhìn gọn gàng */
+    font-weight: 600; /* Làm chữ đậm lên một chút cho dễ nhìn */
+}
+
+/* Hiệu ứng khi di chuột (hover) vào link */
+.steps-list .step-link:hover {
+    color: #7dd3fc; /* Đổi sang màu xanh sáng hơn một chút khi di chuột */
+    text-decoration: underline; /* Tự động gạch chân khi di chuột */
+}
+
+/* Tô màu nổi bật cho chữ -Vnn */
+.steps-list .highlight-vnn {
+    color: var(--accent-gold); /* Sử dụng lại màu vàng Gold thương hiệu của web */
+    font-weight: 700; /* Làm chữ đậm hẳn lên */
+    text-shadow: 0 0 10px rgba(245, 158, 11, 0.5); /* Tạo hiệu ứng phát sáng nhẹ */
+}
 
 .steps-list li {
     display: block;       /* Đổi thành block để câu chữ tự do chạy liên tục */
