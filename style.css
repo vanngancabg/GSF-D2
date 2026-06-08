@@ -85,28 +85,35 @@ h1 { font-size: 46px; font-weight: 800; margin: 0 0 10px 0; }
 .card h2 { margin-top: 0; font-size: 20px; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 20px; }
 
 .guide-card { margin-bottom: 25px; background: linear-gradient(180deg, #111827, #151c2c); }
-.steps-list { list-style: none; padding: 0; margin: 0; }
-.steps-list li {
-    display: grid;
-    grid-template-columns: 32px 1fr;
-    align-items: start;
-    gap: 15px;
-    color: var(--text-muted);
-    font-size: 14px;
-    margin-bottom: 14px;
-    line-height: 1.7;
+.steps-list {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0 0 0;
 }
+
+.steps-list li {
+    display: block;       /* Đổi thành block để câu chữ tự do chạy liên tục */
+    margin-bottom: 12px;  /* Tạo giãn cách thoáng, chống dính hàng dọc */
+    font-size: 14px;
+    line-height: 1.6;
+    color: #ffffff;       /* Đảm bảo chữ thông thường luôn hiển thị màu trắng */
+    text-align: left;
+}
+
+/* Giữ số thứ tự tròn nhỏ gọn đầu câu */
 .step-num {
-    background: #1f2937;
-    color: var(--accent-gold);
-    font-weight: 700;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-top: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--accent-gold);
+    font-weight: 700;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 11px;
+    margin-right: 8px;
+    vertical-align: middle;
 }
 .input-group { margin-bottom: 18px; }
 .input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
