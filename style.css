@@ -56,6 +56,19 @@ h1 { font-size: 46px; font-weight: 800; margin: 0 0 10px 0; }
     padding: 12px 24px; border-radius: 12px; font-weight: 600; text-decoration: none; font-size: 14px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
+/* Định dạng màu sắc cho nút Bách Khoa toàn thư */
+.wiki-btn {
+    background: linear-gradient(135deg, #059669, #10b981); /* Màu xanh lá cây Emerald/Smaragd cực sang trọng */
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #ffffff;
+}
+
+/* Hiệu ứng khi di chuột vào nút */
+.wiki-btn:hover {
+    background: linear-gradient(135deg, #047857, #059669); /* Đậm màu hơn một chút khi hover */
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); /* Tạo hiệu ứng phát sáng nhẹ xung quanh nút */
+    transform: translateY(-2px); /* Nút hơi nảy lên nhẹ tạo cảm giác bấm sống động */
+}
 .btn-discord { background: #5865F2; color: white; }
 .btn-discord:hover { background: #4752C4; }
 .btn-zalo { background: #0068FF; color: white; }
