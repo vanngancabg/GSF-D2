@@ -148,7 +148,7 @@ function renderTable() {
         const row = document.createElement('tr');
         let isApproved = isMemberApproved(member);
         let statusHtml = isApproved 
-            ? '<span class="status-badge approved">✔ Đã duyệt</span>' 
+            ? '<span class="status-badge approved">✔ Đã là thành viên</span>' 
             : '<span class="status-badge pending">⏳ Chờ duyệt</span>';
 
         if (!isApproved) row.className = 'row-pending';
